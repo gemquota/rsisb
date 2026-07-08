@@ -1,0 +1,82 @@
+{
+  "version": "0.0.9",
+  "layer_scores": {
+    "L1": {
+      "score": 83,
+      "metrics": {
+        "execution_reliability": 45,
+        "failure_recovery": 0,
+        "pipeline_activity": 100,
+        "crisis_immunity": 0
+      }
+    },
+    "L2": {
+      "score": 43,
+      "metrics": {
+        "goal_analysis": 0,
+        "step_planning": 0,
+        "apply_success_rate": 26,
+        "stub_resolution": 0,
+        "test_stability": 90,
+        "iteration_efficiency": 0,
+        "pipeline_throughput": 0
+      }
+    },
+    "L3": {
+      "score": 19,
+      "metrics": {
+        "signal_coverage": 1,
+        "goal_generation": 0,
+        "goal_execution": 0,
+        "goal_diversity": 0,
+        "queue_health": 15
+      }
+    },
+    "L4": {
+      "score": 45,
+      "metrics": {
+        "parameter_tuning": 20,
+        "experimentation": 100,
+        "kg_utilization": 0,
+        "optimization_depth": 0,
+        "learning_maturity": 0
+      }
+    },
+    "L5": {
+      "score": 42,
+      "metrics": {
+        "pattern_detection": 0,
+        "strategy_evolution": 100,
+        "insight_utilization": 0,
+        "redundancy_detection": 0,
+        "kg_growth": 0
+      }
+    },
+    "L6": {
+      "score": 92,
+      "metrics": {
+        "value_definition": 0,
+        "value_adherence": 100,
+        "value_reinforcement": 0,
+        "identity_stability": 0,
+        "self_knowledge": 70
+      }
+    }
+  },
+  "value_axioms": {
+    "robustness": { "reinforced_count": 0 },
+    "coherence": { "reinforced_count": 0 },
+    "efficiency": { "reinforced_count": 0 },
+    "maintainability": { "reinforced_count": 0 },
+    "autonomy": { "reinforced_count": 0 },
+    "identity": { "reinforced_count": 0 },
+    "learning": { "reinforced_count": 0 },
+    "stability": { "reinforced_count": 0 },
+    "growth": { "reinforced_count": 0 }
+  },
+  "snapshot_count": 48,
+  "total_attempts": 120,
+  "successful_applications": 9,
+  "kg_nodes_raw": 800,
+  "kg_nodes_consolidated": 7
+}
