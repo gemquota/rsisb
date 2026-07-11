@@ -208,104 +208,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
     padding: 4px 12px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
   }
   .layout-bar button:hover { border-color: var(--accent); }
-
-  /* ── Card Levels ── */
-  .card[data-level="subcard"] { border-left: 3px solid var(--accent); margin-left: 12px; }
-  .card[data-level="partcard"] { border-left: 3px solid var(--yellow); margin-left: 24px; background: rgba(210,153,34,0.04); }
-  .card[data-level="microcard"] { border-left: 3px solid var(--green); margin-left: 36px; background: rgba(63,185,80,0.04); font-size: 0.9rem; }
-  .card[data-level="subcard"] h2 { font-size: 0.9rem; }
-  .card[data-level="partcard"] h2 { font-size: 0.85rem; }
-  .card[data-level="microcard"] h2 { font-size: 0.8rem; }
-  .nest-indicator { font-size: 0.65rem; color: var(--text-dim); margin-left: 4px; font-weight: normal; }
-
-  /* ── Card Sizes ── */
-  .card[data-size="s"] { padding: 8px; }
-  .card[data-size="s"] h2 { font-size: 0.85rem; margin-bottom: 6px; }
-  .card[data-size="s"] .card-content { font-size: 0.75rem; }
-  .card[data-size="l"] { padding: 20px; }
-  .card[data-size="l"] h2 { font-size: 1.1rem; margin-bottom: 16px; }
-  .card[data-size="xl"] { padding: 24px; grid-column: 1 / -1; }
-  .card[data-size="xl"] h2 { font-size: 1.2rem; margin-bottom: 20px; }
-
-  /* ── Card Controls Footer ── */
-  .card-footer {
-    display: none; justify-content: flex-end; gap: 4px;
-    padding-top: 6px; margin-top: 8px; border-top: 1px solid var(--border);
-    font-size: 0.7rem;
-  }
-  .card:hover .card-footer { display: flex; }
-  .card-footer button {
-    background: none; border: 1px solid var(--border); border-radius: 3px;
-    color: var(--text-dim); cursor: pointer; padding: 1px 6px; font-size: 0.7rem;
-    line-height: 1.4;
-  }
-  .card-footer button:hover { border-color: var(--accent); color: var(--accent); }
-  .card-footer .del-btn:hover { border-color: var(--red); color: var(--red); }
-  .card-footer .del-btn { color: var(--red); }
-
-  /* ── Supercard Controls ── */
-  .supercard-footer {
-    display: flex; justify-content: flex-end; gap: 6px;
-    padding-top: 10px; margin-top: 8px; font-size: 0.8rem;
-  }
-  .supercard-footer button {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
-    color: var(--text); cursor: pointer; padding: 3px 10px; font-size: 0.8rem;
-  }
-  .supercard-footer button:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* ── Column Picker ── */
-  .col-picker {
-    display: inline-flex; align-items: center; gap: 3px;
-    margin-left: 10px; font-size: 0.7rem; color: var(--text-dim);
-  }
-  .col-picker button {
-    background: none; border: 1px solid var(--border); border-radius: 3px;
-    color: var(--text-dim); cursor: pointer; padding: 1px 5px; font-size: 0.65rem;
-    line-height: 1.3; min-width: 20px;
-  }
-  .col-picker button:hover { border-color: var(--accent); color: var(--accent); }
-  .col-picker button.active { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.1); }
-  .grid-cols-1 { grid-template-columns: 1fr !important; }
-  .grid-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
-  .grid-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
-  .grid-cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
-  .grid-cols-5 { grid-template-columns: repeat(5, 1fr) !important; }
-  .grid-cols-6 { grid-template-columns: repeat(6, 1fr) !important; }
-
-  /* ── Card Content Editor ── */
-  .card-content-editor {
-    background: #0d1117; border: 1px solid var(--border); border-radius: 4px;
-    color: var(--text); font-size: 0.85rem; padding: 8px; width: 100%;
-    min-height: 40px; font-family: inherit; resize: vertical;
-    margin-top: 4px;
-  }
-  .card-content-editor:focus { border-color: var(--accent); outline: none; }
-
-  /* ── Create Supercard ── */
-  .create-supercard-bar {
-    display: flex; justify-content: center; gap: 8px; padding: 16px 0;
-  }
-  .create-supercard-bar button {
-    background: var(--surface); border: 1px dashed var(--border); border-radius: 8px;
-    color: var(--text-dim); cursor: pointer; padding: 10px 24px; font-size: 0.9rem;
-  }
-  .create-supercard-bar button:hover { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.05); }
-
-  /* ── Empty card placeholder ── */
-  .card-empty {
-    text-align: center; padding: 20px; color: var(--text-dim); font-size: 0.85rem;
-  }
-
-  /* ── Drop zone for nesting ── */
-  .drop-subcard-zone {
-    min-height: 20px; border: 1px dashed transparent; border-radius: 4px;
-    margin-top: 4px; padding: 2px;
-  }
-  .drop-subcard-zone.drag-over-zone {
-    border-color: var(--accent); background: rgba(88,166,255,0.05);
-    min-height: 40px;
-  }
 </style>
 </head>
 <body>
@@ -336,7 +238,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>🧬 Self Model <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">4 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('self-model',1)" data-cols="1">1</button><button onclick="setColumns('self-model',2)" data-cols="2" class="active">2</button><button onclick="setColumns('self-model',3)" data-cols="3">3</button><button onclick="setColumns('self-model',4)" data-cols="4">4</button><button onclick="setColumns('self-model',5)" data-cols="5">5</button><button onclick="setColumns('self-model',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Self-Concept -->
     <div class="card" data-card-id="self-concept" draggable="true">
@@ -344,12 +246,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
       <div id="selfConceptContent">
         <div id="scSummary" style="font-size:0.85rem;line-height:1.6;color:var(--text);font-style:italic;margin-bottom:12px">Loading...</div>
         <div>
-          <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Core Beliefs
-  <div class="supercard-footer">
-    <button onclick="addCard('self-model')" title="Add a new card">➕ Add Card</button>
-    <button onclick="addNestedCard('self-model','subcard')" title="Add a subcard">🔽 Add Subcard</button>
-  </div>
-</div>
+          <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Core Beliefs</div>
           <div id="scCoreBeliefs"></div>
         </div>
       </div>
@@ -369,35 +266,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
       <h2>📝 Self-Description <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div id="descriptionContent" style="font-size:0.85rem;line-height:1.6;color:var(--text)">Loading...</div>
     </div>
-  
-    <div class="card-footer">
-      <button onclick="cycleCardSize('self-concept')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('self-concept','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('self-concept','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('self-concept','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('self-concept')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('self-image')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('self-image','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('self-image','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('self-image','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('self-image')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('self-perception')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('self-perception','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('self-perception','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('self-perception','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('self-perception')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('self-description')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('self-description','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('self-description','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('self-description','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('self-description')" title="Delete card (must be empty)">🗑️</button>
-    </div></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -408,18 +277,13 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>🧠 Personality Profile <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">3 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('personality-profile',1)" data-cols="1">1</button><button onclick="setColumns('personality-profile',2)" data-cols="2" class="active">2</button><button onclick="setColumns('personality-profile',3)" data-cols="3">3</button><button onclick="setColumns('personality-profile',4)" data-cols="4">4</button><button onclick="setColumns('personality-profile',5)" data-cols="5">5</button><button onclick="setColumns('personality-profile',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Personality -->
     <div class="card" data-card-id="personality" draggable="true">
       <h2>🧠 Personality <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div id="personalityContent" style="font-size:0.85rem">Loading...</div>
-    
-  <div class="supercard-footer">
-    <button onclick="addCard('personality-profile')" title="Add a new card">➕ Add Card</button>
-    <button onclick="addNestedCard('personality-profile','subcard')" title="Add a subcard">🔽 Add Subcard</button>
-  </div>
-</div>
+    </div>
     <!-- Characteristics -->
     <div class="card" data-card-id="characteristics" draggable="true">
       <h2>🏷️ Characteristics <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
@@ -430,28 +294,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
       <h2>🧬 Identity Traits <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div id="traits"></div>
     </div>
-  
-    <div class="card-footer">
-      <button onclick="cycleCardSize('personality')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('personality','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('personality','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('personality','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('personality')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('characteristics')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('characteristics','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('characteristics','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('characteristics','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('characteristics')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('identity-traits')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('identity-traits','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('identity-traits','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('identity-traits','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('identity-traits')" title="Delete card (must be empty)">🗑️</button>
-    </div></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -462,38 +305,19 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>⚡ Capabilities <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">2 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('capabilities',1)" data-cols="1">1</button><button onclick="setColumns('capabilities',2)" data-cols="2" class="active">2</button><button onclick="setColumns('capabilities',3)" data-cols="3">3</button><button onclick="setColumns('capabilities',4)" data-cols="4">4</button><button onclick="setColumns('capabilities',5)" data-cols="5">5</button><button onclick="setColumns('capabilities',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Skills -->
     <div class="card" data-card-id="skills" draggable="true">
       <h2>⚡ Skills <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div id="skillsContent" style="font-size:0.85rem">Loading...</div>
-    
-  <div class="supercard-footer">
-    <button onclick="addCard('capabilities')" title="Add a new card">➕ Add Card</button>
-    <button onclick="addNestedCard('capabilities','subcard')" title="Add a subcard">🔽 Add Subcard</button>
-  </div>
-</div>
+    </div>
     <!-- Roles -->
     <div class="card" data-card-id="roles" draggable="true">
       <h2>🎭 Roles <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div id="rolesContent" style="font-size:0.85rem">Loading...</div>
     </div>
-  
-    <div class="card-footer">
-      <button onclick="cycleCardSize('skills')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('skills','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('skills','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('skills','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('skills')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('roles')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('roles','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('roles','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('roles','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('roles')" title="Delete card (must be empty)">🗑️</button>
-    </div></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -504,19 +328,14 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>🧭 Belief System <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">3 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('belief-system',1)" data-cols="1">1</button><button onclick="setColumns('belief-system',2)" data-cols="2" class="active">2</button><button onclick="setColumns('belief-system',3)" data-cols="3">3</button><button onclick="setColumns('belief-system',4)" data-cols="4">4</button><button onclick="setColumns('belief-system',5)" data-cols="5">5</button><button onclick="setColumns('belief-system',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Beliefs -->
     <div class="card" data-card-id="beliefs" draggable="true">
       <h2>📜 Beliefs <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div id="beliefsContent">
         <div style="margin-top:8px"><strong style="font-size:0.85rem">Active Beliefs</strong></div>
-        <div id="beliefsList" style="font-size:0.85rem;color:var(--text-dim);margin-top:4px">Loading...
-  <div class="supercard-footer">
-    <button onclick="addCard('belief-system')" title="Add a new card">➕ Add Card</button>
-    <button onclick="addNestedCard('belief-system','subcard')" title="Add a subcard">🔽 Add Subcard</button>
-  </div>
-</div>
+        <div id="beliefsList" style="font-size:0.85rem;color:var(--text-dim);margin-top:4px">Loading...</div>
       </div>
     </div>
     <!-- Value Axioms -->
@@ -529,28 +348,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
       <h2>🔗 Identity Coherence <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div id="coherenceContent" style="font-size:0.85rem">Loading...</div>
     </div>
-  
-    <div class="card-footer">
-      <button onclick="cycleCardSize('beliefs')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('beliefs','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('beliefs','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('beliefs','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('beliefs')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('value-axioms')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('value-axioms','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('value-axioms','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('value-axioms','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('value-axioms')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('identity-coherence')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('identity-coherence','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('identity-coherence','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('identity-coherence','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('identity-coherence')" title="Delete card (must be empty)">🗑️</button>
-    </div></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -561,7 +359,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>🎯 Direction & Growth <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">2 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('direction-growth',1)" data-cols="1">1</button><button onclick="setColumns('direction-growth',2)" data-cols="2" class="active">2</button><button onclick="setColumns('direction-growth',3)" data-cols="3">3</button><button onclick="setColumns('direction-growth',4)" data-cols="4">4</button><button onclick="setColumns('direction-growth',5)" data-cols="5">5</button><button onclick="setColumns('direction-growth',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Purpose -->
     <div class="card" data-card-id="purpose" draggable="true">
@@ -569,12 +367,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
       <div id="purposeContent">
         <div id="purposeStatement" style="font-size:0.85rem;font-style:italic;line-height:1.6;color:var(--text);margin-bottom:12px">Loading...</div>
         <div style="margin-bottom:10px">
-          <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">Clarity
-  <div class="supercard-footer">
-    <button onclick="addCard('direction-growth')" title="Add a new card">➕ Add Card</button>
-    <button onclick="addNestedCard('direction-growth','subcard')" title="Add a subcard">🔽 Add Subcard</button>
-  </div>
-</div>
+          <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">Clarity</div>
           <div id="purposeClarityBar"><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:85%;background:var(--green);border-radius:3px"></div></div></div>
           <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-dim);margin-top:2px">
             <span>Developing</span><span>Articulated</span><span>✧ Refined</span>
@@ -593,21 +386,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
         <div id="aspirationsList" style="font-size:0.85rem">Loading...</div>
       </div>
     </div>
-  
-    <div class="card-footer">
-      <button onclick="cycleCardSize('purpose')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('purpose','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('purpose','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('purpose','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('purpose')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('aspirations')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('aspirations','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('aspirations','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('aspirations','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('aspirations')" title="Delete card (must be empty)">🗑️</button>
-    </div></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -618,18 +397,13 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>📖 Narrative Arc <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">3 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('narrative-arc',1)" data-cols="1">1</button><button onclick="setColumns('narrative-arc',2)" data-cols="2" class="active">2</button><button onclick="setColumns('narrative-arc',3)" data-cols="3">3</button><button onclick="setColumns('narrative-arc',4)" data-cols="4">4</button><button onclick="setColumns('narrative-arc',5)" data-cols="5">5</button><button onclick="setColumns('narrative-arc',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Current Narrative -->
     <div class="card" data-card-id="current-narrative" draggable="true">
       <h2>📖 Current Narrative <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div class="narrative-box" id="narrative">Loading...</div>
-    
-  <div class="supercard-footer">
-    <button onclick="addCard('narrative-arc')" title="Add a new card">➕ Add Card</button>
-    <button onclick="addNestedCard('narrative-arc','subcard')" title="Add a subcard">🔽 Add Subcard</button>
-  </div>
-</div>
+    </div>
     <!-- Self-Narrative -->
     <div class="card" data-card-id="self-narrative" draggable="true">
       <h2>📖 Self-Narrative <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
@@ -640,28 +414,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
       <h2>📈 Identity Evolution <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div id="evolutionContent" style="font-size:0.85rem">Loading...</div>
     </div>
-  
-    <div class="card-footer">
-      <button onclick="cycleCardSize('current-narrative')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('current-narrative','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('current-narrative','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('current-narrative','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('current-narrative')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('self-narrative')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('self-narrative','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('self-narrative','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('self-narrative','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('self-narrative')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('identity-evolution')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('identity-evolution','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('identity-evolution','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('identity-evolution','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('identity-evolution')" title="Delete card (must be empty)">🗑️</button>
-    </div></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -672,18 +425,13 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>📊 System Health <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">4 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('system-health',1)" data-cols="1">1</button><button onclick="setColumns('system-health',2)" data-cols="2" class="active">2</button><button onclick="setColumns('system-health',3)" data-cols="3">3</button><button onclick="setColumns('system-health',4)" data-cols="4">4</button><button onclick="setColumns('system-health',5)" data-cols="5">5</button><button onclick="setColumns('system-health',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Vital Signs -->
     <div class="card" data-card-id="vital-signs" draggable="true">
       <h2>🩺 Identity Vital Signs <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
       <div id="vitalSignsContent" style="font-size:0.85rem">Loading...</div>
-    
-  <div class="supercard-footer">
-    <button onclick="addCard('system-health')" title="Add a new card">➕ Add Card</button>
-    <button onclick="addNestedCard('system-health','subcard')" title="Add a subcard">🔽 Add Subcard</button>
-  </div>
-</div>
+    </div>
     <!-- Crisis Status -->
     <div class="card" data-card-id="crisis-status" draggable="true">
       <h2>🚨 Crisis Status <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
@@ -712,35 +460,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
         <div class="stat"><div class="num" id="statBalance">—</div><div class="lbl">Axiom Balance</div></div>
       </div>
     </div>
-  
-    <div class="card-footer">
-      <button onclick="cycleCardSize('vital-signs')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('vital-signs','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('vital-signs','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('vital-signs','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('vital-signs')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('crisis-status')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('crisis-status','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('crisis-status','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('crisis-status','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('crisis-status')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('layer-scores')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('layer-scores','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('layer-scores','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('layer-scores','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('layer-scores')" title="Delete card (must be empty)">🗑️</button>
-    </div>
-    <div class="card-footer">
-      <button onclick="cycleCardSize('system-stats')" title="Toggle size">📐 Size</button>
-      <button onclick="addNestedCard('system-stats','subcard')" title="Add subcard">🔽 Sub</button>
-      <button onclick="addNestedCard('system-stats','partcard')" title="Add partcard">📎 Part</button>
-      <button onclick="addNestedCard('system-stats','microcard')" title="Add microcard">🔬 Micro</button>
-      <button class="del-btn" onclick="deleteCard('system-stats')" title="Delete card (must be empty)">🗑️</button>
-    </div></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -1349,13 +1069,7 @@ async function loadTimeline() {
         const t = new Date(m.timestamp * 1000).toISOString().slice(11, 19);
         html += `<div class="milestone" style="cursor:pointer" onclick="openSnapshotDetail(${m.snapshot_id})">#${m.snapshot_id} @ ${t}: <span class="reason">${m.reasons.join(', ')}</span></div>`;
       }
-      html += '
-<!-- Create Supercard -->
-<div class="create-supercard-bar">
-  <button onclick="createSupercard()">➕ Create Supercard</button>
-</div>
-
-</div>';
+      html += '</div>';
     }
 
     container.innerHTML = html;
@@ -1648,470 +1362,6 @@ function updateLayoutStatus(msg) {
   };
   window._dashboardLoaded = true;
 })();
-
-// ── Create Supercard ──
-function createSupercard() {
-  var id = 'sc-' + Date.now();
-  var layout = getLayout() || getDefaultLayout();
-  layout.supercards.push({ id: id, cards: [] });
-  if (!layout.supercardNames) layout.supercardNames = {};
-  layout.supercardNames[id] = '📦 New Supercard';
-  saveLayoutObj(layout);
-  renderSupercard(id);
-  updateLayoutStatus('created supercard');
-}
-
-function renderSupercard(sid) {
-  var layout = getLayout();
-  if (!layout) return;
-  var scData = layout.supercards.find(function(s) { return s.id === sid; });
-  if (!scData) return;
-  var name = (layout.supercardNames && layout.supercardNames[sid]) || '📦 Supercard';
-  var existing = document.querySelector('.supercard[data-supercard-id="' + sid + '"]');
-  if (existing) return; // already rendered
-
-  var html = '<div class="supercard" data-supercard-id="' + sid + '">';
-  html += '<div class="supercard-header"><h2>' + name + ' <button class="edit-btn" title="Rename supercard" onclick="startRename(this,\'supercard\')">✎</button></h2>';
-  html += '<span class="sc-count">0 cards</span>';
-  html += '<span class="col-picker">Col: ';
-  for (var c = 1; c <= 6; c++) html += '<button onclick="setColumns(\'' + sid + '\',' + c + ')" data-cols="' + c + '"' + (c === 2 ? ' class="active"' : '') + '>' + c + '</button>';
-  html += '</span></div>';
-  html += '<div class="supercard-grid drop-zone" data-drop-zone="true"></div>';
-  html += '<div class="supercard-footer">';
-  html += '<button onclick="addCard(\'' + sid + '\')">➕ Add Card</button>';
-  html += '<button onclick="addNestedCard(\'' + sid + '\',\'subcard\')">🔽 Add Subcard</button>';
-  html += '<button onclick="deleteSupercard(\'' + sid + '\')" style="color:var(--red)">🗑️ Delete Supercard</button>';
-  html += '</div></div>';
-
-  // Insert before the create bar
-  var createBar = document.querySelector('.create-supercard-bar');
-  if (createBar) {
-    createBar.insertAdjacentHTML('beforebegin', html);
-  } else {
-    document.querySelector('.layout-bar').insertAdjacentHTML('beforebegin', html);
-  }
-
-  // Add any saved cards
-  if (scData.cards && scData.cards.length > 0) {
-    scData.cards.forEach(function(cid) { renderCard(cid, sid); });
-  }
-  updateSupercardCount(sid);
-}
-
-function deleteSupercard(sid) {
-  var sc = document.querySelector('.supercard[data-supercard-id="' + sid + '"]');
-  if (!sc) return;
-  var cards = sc.querySelectorAll('.card[data-card-id]');
-  if (cards.length > 0) {
-    if (!confirm('Delete this supercard and all its cards (' + cards.length + ' cards)?')) return;
-  }
-  sc.remove();
-  var layout = getLayout();
-  if (layout && layout.supercards) {
-    layout.supercards = layout.supercards.filter(function(s) { return s.id !== sid; });
-    saveLayoutObj(layout);
-  }
-  updateLayoutStatus('deleted supercard');
-}
-
-// ── Create Card ──
-function addCard(supercardId) {
-  var cid = 'c-' + Date.now();
-  var layout = getLayout();
-  if (!layout) return;
-  var sc = layout.supercards.find(function(s) { return s.id === supercardId; });
-  if (!sc) { sc = { id: supercardId, cards: [] }; layout.supercards.push(sc); }
-  if (!sc.cards) sc.cards = [];
-  sc.cards.push(cid);
-  if (!layout.cardNames) layout.cardNames = {};
-  layout.cardNames[cid] = '📄 New Card';
-  // Default content
-  if (!layout.cardContent) layout.cardContent = {};
-  layout.cardContent[cid] = 'New card — edit this content.';
-  if (!layout.cardSizes) layout.cardSizes = {};
-  layout.cardSizes[cid] = 'm';
-  saveLayoutObj(layout);
-  renderCard(cid, supercardId);
-  updateLayoutStatus('created card');
-}
-
-function addNestedCard(parentId, level) {
-  var cid = 'c-' + Date.now();
-  var layout = getLayout() || getDefaultLayout();
-  // Find parent in the layout tree
-  var parent = findCardInLayout(layout, parentId);
-  if (!parent) {
-    // Maybe it's a supercard
-    var sc = layout.supercards.find(function(s) { return s.id === parentId; });
-    if (sc) {
-      if (!sc.cards) sc.cards = [];
-      sc.cards.push(cid);
-    }
-  }
-  if (!layout.cardNames) layout.cardNames = {};
-  var levelLabel = { subcard: '📌 Subcard', partcard: '📎 Partcard', microcard: '🔬 Microcard' };
-  layout.cardNames[cid] = levelLabel[level] || '📄 Card';
-  if (!layout.cardLevels) layout.cardLevels = {};
-  layout.cardLevels[cid] = level;
-  if (!layout.cardSizes) layout.cardSizes = {};
-  layout.cardSizes[cid] = 's';
-  if (!layout.cardContent) layout.cardContent = {};
-  layout.cardContent[cid] = 'Edit this ' + level + '.';
-  saveLayoutObj(layout);
-  renderCard(cid, parentId, level);
-  updateLayoutStatus('added ' + level);
-}
-
-function findCardInLayout(layout, id) {
-  function search(items) {
-    if (!items) return null;
-    for (var i = 0; i < items.length; i++) {
-      if (items[i] === id || (typeof items[i] === 'object' && items[i].id === id)) return items[i];
-      if (typeof items[i] === 'object' && items[i].cards) {
-        var found = search(items[i].cards);
-        if (found) return found;
-      }
-    }
-    return null;
-  }
-  // Search supercards
-  if (layout.supercards) {
-    for (var i = 0; i < layout.supercards.length; i++) {
-      var sc = layout.supercards[i];
-      if (sc.id === id) return sc;
-      if (sc.cards) {
-        var found = search(sc.cards);
-        if (found) return found;
-      }
-    }
-  }
-  return null;
-}
-
-function renderCard(cid, parentId, level) {
-  var layout = getLayout();
-  if (!layout) return;
-  var name = (layout.cardNames && layout.cardNames[cid]) || '📄 Card';
-  var size = (layout.cardSizes && layout.cardSizes[cid]) || 'm';
-  var content = (layout.cardContent && layout.cardContent[cid]) || '';
-  var cardLevel = level || (layout.cardLevels && layout.cardLevels[cid]) || 'card';
-
-  var existing = document.querySelector('.card[data-card-id="' + cid + '"]');
-  if (existing) return;
-
-  var levelLabel = '';
-  if (cardLevel !== 'card') levelLabel = '<span class="nest-indicator">(' + cardLevel + ')</span>';
-
-  var html = '<div class="card" data-card-id="' + cid + '" draggable="true" data-level="' + cardLevel + '" data-size="' + size + '">';
-  html += '<h2>' + name + ' ' + levelLabel + ' <button class="edit-btn" title="Rename" onclick="startRename(this,\'card\')">✎</button></h2>';
-  html += '<div class="card-content" id="card-content-' + cid + '">';
-  html += '<textarea class="card-content-editor" id="editor-' + cid + '" placeholder="Type card content here..." onblur="saveCardContent(\'' + cid + '\', this.value)">' + escapeHtml(content) + '</textarea>';
-  html += '</div>';
-  // Drop zone for subcards
-  if (cardLevel === 'card' || cardLevel === 'subcard') {
-    html += '<div class="drop-subcard-zone" data-drop-zone="true" data-parent="' + cid + '"></div>';
-  }
-  html += '<div class="card-footer">';
-  html += '<button onclick="cycleCardSize(\'' + cid + '\')">📐 Size</button>';
-  if (cardLevel === 'card') html += '<button onclick="addNestedCard(\'' + cid + '\',\'subcard\')">🔽 Sub</button>';
-  if (cardLevel === 'subcard') html += '<button onclick="addNestedCard(\'' + cid + '\',\'partcard\')">📎 Part</button>';
-  if (cardLevel === 'partcard') html += '<button onclick="addNestedCard(\'' + cid + '\',\'microcard\')">🔬 Micro</button>';
-  html += '<button class="del-btn" onclick="deleteCard(\'' + cid + '\')">🗑️</button>';
-  html += '</div></div>';
-
-  // Insert into parent
-  if (parentId) {
-    var parentEl = document.querySelector('[data-supercard-id="' + parentId + '"] .drop-zone') ||
-                   document.querySelector('[data-card-id="' + parentId + '"] .drop-subcard-zone') ||
-                   document.querySelector('[data-card-id="' + parentId + '"]');
-    if (parentEl) {
-      parentEl.insertAdjacentHTML('beforeend', html);
-    }
-  } else {
-    // Fallback: try to find by supercard
-    var sc = document.querySelector('.supercard:first-child .drop-zone');
-    if (sc) sc.insertAdjacentHTML('beforeend', html);
-  }
-
-  // Render nested children
-  if (layout.supercards) {
-    for (var i = 0; i < layout.supercards.length; i++) {
-      var sc = layout.supercards[i];
-      if (sc.cards) renderChildren(sc.cards, cid, layout);
-    }
-  }
-  updateSupercardCounts();
-}
-
-function renderChildren(children, parentId, layout) {
-  if (!children || !Array.isArray(children)) return;
-  var idx = children.indexOf(parentId);
-  // Actually we need to find items that have this parentId as their parent
-  // The nesting is stored differently
-  if (layout.cardParents) {
-    Object.keys(layout.cardParents).forEach(function(cid) {
-      if (layout.cardParents[cid] === parentId) {
-        var lvl = (layout.cardLevels && layout.cardLevels[cid]) || 'subcard';
-        renderCard(cid, parentId, lvl);
-      }
-    });
-  }
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function saveCardContent(cid, value) {
-  var layout = getLayout();
-  if (!layout) return;
-  if (!layout.cardContent) layout.cardContent = {};
-  layout.cardContent[cid] = value;
-  saveLayoutObj(layout);
-}
-
-function deleteCard(cid) {
-  var card = document.querySelector('.card[data-card-id="' + cid + '"]');
-  if (!card) return;
-  // Check if it has nested cards
-  var nested = card.querySelectorAll('.card[data-card-id]');
-  if (nested.length > 0) {
-    if (!confirm('Delete this card and its ' + nested.length + ' nested cards?')) return;
-  }
-  card.remove();
-  // Update layout
-  var layout = getLayout();
-  if (layout) {
-    // Remove from supercards and parent cards
-    if (layout.supercards) {
-      layout.supercards.forEach(function(sc) {
-        if (sc.cards) {
-          var idx = sc.cards.indexOf(cid);
-          if (idx >= 0) sc.cards.splice(idx, 1);
-        }
-      });
-    }
-    delete layout.cardNames[cid];
-    delete layout.cardContent[cid];
-    delete layout.cardSizes[cid];
-    delete layout.cardLevels[cid];
-    saveLayoutObj(layout);
-  }
-  updateSupercardCounts();
-  updateLayoutStatus('deleted card');
-}
-
-function cycleCardSize(cid) {
-  var card = document.querySelector('.card[data-card-id="' + cid + '"]');
-  if (!card) return;
-  var sizes = ['s', 'm', 'l', 'xl'];
-  var cur = card.dataset.size || 'm';
-  var next = sizes[(sizes.indexOf(cur) + 1) % sizes.length];
-  card.dataset.size = next;
-  // Save
-  var layout = getLayout();
-  if (layout) {
-    if (!layout.cardSizes) layout.cardSizes = {};
-    layout.cardSizes[cid] = next;
-    saveLayoutObj(layout);
-  }
-}
-
-function setColumns(sid, n) {
-  var sc = document.querySelector('.supercard[data-supercard-id="' + sid + '"]');
-  if (!sc) return;
-  var grid = sc.querySelector('.drop-zone');
-  if (!grid) return;
-  // Remove all col classes
-  for (var i = 1; i <= 6; i++) grid.classList.remove('grid-cols-' + i);
-  if (n > 1) grid.classList.add('grid-cols-' + n);
-  // Update button states
-  sc.querySelectorAll('.col-picker button').forEach(function(b) {
-    b.classList.toggle('active', parseInt(b.dataset.cols) === n);
-  });
-  // Save
-  var layout = getLayout();
-  if (layout) {
-    if (!layout.columnCounts) layout.columnCounts = {};
-    layout.columnCounts[sid] = n;
-    saveLayoutObj(layout);
-  }
-}
-
-function updateSupercardCount(sid) {
-  var sc = document.querySelector('.supercard[data-supercard-id="' + sid + '"]');
-  if (!sc) return;
-  var count = sc.querySelectorAll('.card[data-card-id]').length;
-  var el = sc.querySelector('.sc-count');
-  if (el) el.textContent = count + ' card' + (count !== 1 ? 's' : '');
-}
-
-function updateSupercardCounts() {
-  document.querySelectorAll('.supercard').forEach(function(sc) {
-    var sid = sc.dataset.supercardId;
-    if (sid) updateSupercardCount(sid);
-  });
-}
-
-// ── Extend getDefaultLayout to capture nesting ──
-var origGetDefaultLayout = window.getDefaultLayout || function() {};
-window.getDefaultLayout = function() {
-  var layout = { supercards: [], cardNames: {}, supercardNames: {}, cardContent: {}, cardSizes: {}, cardLevels: {}, columnCounts: {}, cardParents: {} };
-  document.querySelectorAll('.supercard').forEach(function(sc) {
-    var sid = sc.dataset.supercardId;
-    if (!sid) return;
-    var h2 = sc.querySelector('.supercard-header h2');
-    var name = '';
-    if (h2) { for (var i = 0; i < h2.childNodes.length; i++) { var n = h2.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) name += n.textContent.trim(); } }
-    layout.supercardNames[sid] = name || sid;
-    // Column count
-    var grid = sc.querySelector('.drop-zone');
-    if (grid) {
-      for (var c = 2; c <= 6; c++) { if (grid.classList.contains('grid-cols-' + c)) { layout.columnCounts[sid] = c; break; } }
-    }
-    // Cards - walk the DOM tree
-    function collectCards(el, parentId) {
-      var cards = [];
-      el.querySelectorAll(':scope > .card[data-card-id]').forEach(function(card) {
-        var cid = card.dataset.cardId;
-        cards.push(cid);
-        var ch2 = card.querySelector('h2');
-        var cname = '';
-        if (ch2) { for (var i = 0; i < ch2.childNodes.length; i++) { var n = ch2.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) cname += n.textContent.trim(); } }
-        layout.cardNames[cid] = cname || cid;
-        layout.cardSizes[cid] = card.dataset.size || 'm';
-        layout.cardLevels[cid] = card.dataset.level || 'card';
-        if (parentId) layout.cardParents[cid] = parentId;
-        // Content
-        var editor = document.getElementById('editor-' + cid);
-        if (editor) layout.cardContent[cid] = editor.value;
-        // Nested
-        var subZone = card.querySelector('.drop-subcard-zone');
-        if (subZone) collectCards(subZone, cid);
-      });
-      return cards;
-    }
-    var topCards = collectCards(grid, null);
-    layout.supercards.push({ id: sid, cards: topCards });
-  });
-  // Timeline
-  var tl = document.querySelector('.card[data-card-id="timeline"]');
-  if (tl) {
-    var tlh2 = tl.querySelector('h2');
-    layout.cardNames['timeline'] = tlh2 ? tlh2.textContent.replace('✎','').trim() : '📅 Snapshot Timeline';
-    layout.cardSizes['timeline'] = tl.dataset.size || 'm';
-  }
-  return layout;
-};
-
-// ── Extend applyLayout to handle nesting, columns, sizes ──
-var origApplyLayout = window.applyLayout || function(){};
-window.applyLayout = function(layout) {
-  if (!layout || !layout.supercards) return;
-  // Apply column counts
-  if (layout.columnCounts) {
-    Object.keys(layout.columnCounts).forEach(function(sid) {
-      var n = layout.columnCounts[sid];
-      if (n > 1) setColumns(sid, n);
-    });
-  }
-  // Apply card sizes
-  if (layout.cardSizes) {
-    Object.keys(layout.cardSizes).forEach(function(cid) {
-      var card = document.querySelector('.card[data-card-id="' + cid + '"]');
-      if (card) card.dataset.size = layout.cardSizes[cid];
-    });
-  }
-  // Apply card levels
-  if (layout.cardLevels) {
-    Object.keys(layout.cardLevels).forEach(function(cid) {
-      var card = document.querySelector('.card[data-card-id="' + cid + '"]');
-      if (card) card.dataset.level = layout.cardLevels[cid];
-    });
-  }
-  updateSupercardCounts();
-};
-
-// ── Extend saveLayout to include nesting ──
-var origSaveLayout = window.saveLayout || function(){};
-window.saveLayout = function() {
-  var layout = getDefaultLayout();
-  saveLayoutObj(layout);
-};
-
-// ── Extend resetLayout ──
-var origResetLayout = window.resetLayout || function(){};
-window.resetLayout = function() {
-  if (!confirm('Reset layout to defaults? All custom cards and changes will be lost.')) return;
-  localStorage.removeItem('identity_dashboard_layout');
-  location.reload();
-};
-
-// ── Handle drag-drop for nesting ──
-// Enhance existing drop handler to support nesting
-document.addEventListener('drop', function(e) {
-  e.preventDefault();
-  document.querySelectorAll('.drag-over-zone').forEach(function(z) { z.classList.remove('drag-over-zone'); });
-  document.querySelectorAll('.drag-over').forEach(function(c) { c.classList.remove('drag-over'); });
-  if (!draggedCardId) return;
-
-  // Check if dropped on a card (for nesting)
-  var targetCard = e.target.closest('.card[data-card-id]');
-  var targetZone = e.target.closest('[data-drop-zone="true"]');
-  var draggedCard = document.querySelector('.card[data-card-id="' + draggedCardId + '"]');
-  if (!draggedCard) return;
-
-  if (targetCard && targetCard.dataset.cardId !== draggedCardId) {
-    // Nesting: drop onto a card to make it a subcard
-    var subZone = targetCard.querySelector('.drop-subcard-zone');
-    var draggedLevel = draggedCard.dataset.level || 'card';
-    var targetLevel = targetCard.dataset.level || 'card';
-
-    // Determine new level based on target
-    var newLevel = '';
-    if (targetLevel === 'card') newLevel = 'subcard';
-    else if (targetLevel === 'subcard') newLevel = 'partcard';
-    else if (targetLevel === 'partcard') newLevel = 'microcard';
-    else newLevel = 'microcard';
-
-    if (subZone) {
-      dragSourceZone = draggedCard.closest('.drop-zone') || draggedCard.closest('.drop-subcard-zone');
-      subZone.appendChild(draggedCard);
-      draggedCard.dataset.level = newLevel;
-
-      // Re-render controls for new level
-      // (leave existing controls, they'll update on next interaction)
-
-      // Save parent relationship
-      var layout = getLayout();
-      if (layout) {
-        if (!layout.cardParents) layout.cardParents = {};
-        layout.cardParents[draggedCardId] = targetCard.dataset.cardId;
-        if (!layout.cardLevels) layout.cardLevels = {};
-        layout.cardLevels[draggedCardId] = newLevel;
-        saveLayoutObj(layout);
-        updateSupercardCounts();
-      }
-      updateLayoutStatus('nested as ' + newLevel);
-      return;
-    }
-  }
-
-  // If dropped on a zone (supercard grid), move there
-  if (targetZone) {
-    draggedCard.dataset.level = 'card';
-    targetZone.appendChild(draggedCard);
-    var layout = getLayout();
-    if (layout) {
-      delete layout.cardParents[draggedCardId];
-      if (layout.cardLevels) layout.cardLevels[draggedCardId] = 'card';
-      saveLayoutObj(layout);
-      updateSupercardCounts();
-    }
-    updateLayoutStatus('moved');
-  }
-});
 </script>
 
 
