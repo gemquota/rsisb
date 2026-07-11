@@ -313,17 +313,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   body.global-cols-3 .supercard-grid { grid-template-columns: repeat(3, 1fr) !important; }
   body.global-cols-4 .supercard-grid { grid-template-columns: repeat(4, 1fr) !important; }
   .global-col-picker button.active { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(88,166,255,0.1); }
-
-  /* ── Conditional Column Pickers ── */
-  .sc-col-picker, .card-col-picker { display: none !important; }
-  .supercard.has-cards .sc-col-picker { display: inline-flex !important; align-items: center; gap: 2px; }
-  .card.has-subcards .card-col-picker { display: inline-flex !important; align-items: center; gap: 2px; }
-  .sc-col-picker button.active, .card-col-picker button.active { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(88,166,255,0.1); }
-  /* Zone column classes */
-  .zone-cols-1 { grid-template-columns: 1fr !important; }
-  .zone-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
-  .zone-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
-  .zone-cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
 </style>
 </head>
 <body>
@@ -359,7 +348,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="self-model">
   <div class="supercard-header">
     <h2>🧬 Self Model <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count" style="display:inline-flex;align-items:center;gap:8px">4 cards</span><span class="sc-col-picker" data-sc-id="self-model" style="display:none;font-size:0.7rem;color:var(--text-dim);margin-left:4px">| Col: <button onclick="setZoneCols('self-model',1,'sc')" data-col="1" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">1</button><button onclick="setZoneCols('self-model',2,'sc')" data-col="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:2px;color:var(--accent);cursor:pointer;padding:0 4px;font-size:0.65rem">2</button><button onclick="setZoneCols('self-model',3,'sc')" data-col="3" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">3</button><button onclick="setZoneCols('self-model',4,'sc')" data-col="4" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">4</button></span>
+    <span class="sc-count">4 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Self-Concept -->
@@ -431,7 +420,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="personality-profile">
   <div class="supercard-header">
     <h2>🧠 Personality Profile <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count" style="display:inline-flex;align-items:center;gap:8px">3 cards</span><span class="sc-col-picker" data-sc-id="self-model" style="display:none;font-size:0.7rem;color:var(--text-dim);margin-left:4px">| Col: <button onclick="setZoneCols('self-model',1,'sc')" data-col="1" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">1</button><button onclick="setZoneCols('self-model',2,'sc')" data-col="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:2px;color:var(--accent);cursor:pointer;padding:0 4px;font-size:0.65rem">2</button><button onclick="setZoneCols('self-model',3,'sc')" data-col="3" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">3</button><button onclick="setZoneCols('self-model',4,'sc')" data-col="4" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">4</button></span>
+    <span class="sc-count">3 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Personality -->
@@ -485,7 +474,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="capabilities">
   <div class="supercard-header">
     <h2>⚡ Capabilities <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count" style="display:inline-flex;align-items:center;gap:8px">2 cards</span><span class="sc-col-picker" data-sc-id="self-model" style="display:none;font-size:0.7rem;color:var(--text-dim);margin-left:4px">| Col: <button onclick="setZoneCols('self-model',1,'sc')" data-col="1" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">1</button><button onclick="setZoneCols('self-model',2,'sc')" data-col="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:2px;color:var(--accent);cursor:pointer;padding:0 4px;font-size:0.65rem">2</button><button onclick="setZoneCols('self-model',3,'sc')" data-col="3" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">3</button><button onclick="setZoneCols('self-model',4,'sc')" data-col="4" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">4</button></span>
+    <span class="sc-count">2 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Skills -->
@@ -527,7 +516,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="belief-system">
   <div class="supercard-header">
     <h2>🧭 Belief System <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count" style="display:inline-flex;align-items:center;gap:8px">3 cards</span><span class="sc-col-picker" data-sc-id="self-model" style="display:none;font-size:0.7rem;color:var(--text-dim);margin-left:4px">| Col: <button onclick="setZoneCols('self-model',1,'sc')" data-col="1" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">1</button><button onclick="setZoneCols('self-model',2,'sc')" data-col="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:2px;color:var(--accent);cursor:pointer;padding:0 4px;font-size:0.65rem">2</button><button onclick="setZoneCols('self-model',3,'sc')" data-col="3" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">3</button><button onclick="setZoneCols('self-model',4,'sc')" data-col="4" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">4</button></span>
+    <span class="sc-count">3 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Beliefs -->
@@ -584,7 +573,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="direction-growth">
   <div class="supercard-header">
     <h2>🎯 Direction & Growth <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count" style="display:inline-flex;align-items:center;gap:8px">2 cards</span><span class="sc-col-picker" data-sc-id="self-model" style="display:none;font-size:0.7rem;color:var(--text-dim);margin-left:4px">| Col: <button onclick="setZoneCols('self-model',1,'sc')" data-col="1" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">1</button><button onclick="setZoneCols('self-model',2,'sc')" data-col="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:2px;color:var(--accent);cursor:pointer;padding:0 4px;font-size:0.65rem">2</button><button onclick="setZoneCols('self-model',3,'sc')" data-col="3" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">3</button><button onclick="setZoneCols('self-model',4,'sc')" data-col="4" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">4</button></span>
+    <span class="sc-count">2 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Purpose -->
@@ -641,7 +630,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="narrative-arc">
   <div class="supercard-header">
     <h2>📖 Narrative Arc <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count" style="display:inline-flex;align-items:center;gap:8px">3 cards</span><span class="sc-col-picker" data-sc-id="self-model" style="display:none;font-size:0.7rem;color:var(--text-dim);margin-left:4px">| Col: <button onclick="setZoneCols('self-model',1,'sc')" data-col="1" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">1</button><button onclick="setZoneCols('self-model',2,'sc')" data-col="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:2px;color:var(--accent);cursor:pointer;padding:0 4px;font-size:0.65rem">2</button><button onclick="setZoneCols('self-model',3,'sc')" data-col="3" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">3</button><button onclick="setZoneCols('self-model',4,'sc')" data-col="4" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">4</button></span>
+    <span class="sc-count">3 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Current Narrative -->
@@ -695,7 +684,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="system-health">
   <div class="supercard-header">
     <h2>📊 System Health <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count" style="display:inline-flex;align-items:center;gap:8px">4 cards</span><span class="sc-col-picker" data-sc-id="self-model" style="display:none;font-size:0.7rem;color:var(--text-dim);margin-left:4px">| Col: <button onclick="setZoneCols('self-model',1,'sc')" data-col="1" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">1</button><button onclick="setZoneCols('self-model',2,'sc')" data-col="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:2px;color:var(--accent);cursor:pointer;padding:0 4px;font-size:0.65rem">2</button><button onclick="setZoneCols('self-model',3,'sc')" data-col="3" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">3</button><button onclick="setZoneCols('self-model',4,'sc')" data-col="4" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">4</button></span>
+    <span class="sc-count">4 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Vital Signs -->
@@ -1663,10 +1652,7 @@ function updateLayoutStatus(msg) {
     var layout = getLayout();
     if (layout && layout.supercards) applyLayout(layout);
     if (!getLayout()) { var def = getDefaultLayout(); def._default = true; saveLayoutObj(def); }
-  
-  // Init column picker visibility
-  setTimeout(updateColPickerVisibility, 200);
-};
+  };
   window._dashboardLoaded = true;
 })();
 
@@ -1693,9 +1679,9 @@ function renderSupercard(sid) {
 
   var html = '<div class="supercard" data-supercard-id="' + sid + '">';
   html += '<div class="supercard-header"><h2>' + name + ' <button class="edit-btn" title="Rename supercard" onclick="startRename(this,\'supercard\')">✎</button></h2>';
-  html += '<span class="sc-count" style="display:inline-flex;align-items:center;gap:8px">0 cards</span><span class="sc-col-picker" data-sc-id="self-model" style="display:none;font-size:0.7rem;color:var(--text-dim);margin-left:4px">| Col: <button onclick="setZoneCols('self-model',1,'sc')" data-col="1" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">1</button><button onclick="setZoneCols('self-model',2,'sc')" data-col="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:2px;color:var(--accent);cursor:pointer;padding:0 4px;font-size:0.65rem">2</button><button onclick="setZoneCols('self-model',3,'sc')" data-col="3" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">3</button><button onclick="setZoneCols('self-model',4,'sc')" data-col="4" style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">4</button></span>';
-  html += '<span class="sc-col-picker" data-sc-id="' + sid + '" style="display:none;font-size:0.7rem;color:var(--text-dim);margin-left:4px">| Col: ';
-  for (var c = 1; c <= 4; c++) html += '<button onclick="setZoneCols(\'' + sid + '\',' + c + ',\'sc\')" data-col="' + c + '"' + (c === 2 ? ' class="active"' : '') + ' style="background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem">' + c + '</button>';
+  html += '<span class="sc-count">0 cards</span>';
+  html += '<span class="col-picker">Col: ';
+  for (var c = 1; c <= 6; c++) html += '<button onclick="setColumns(\'' + sid + '\',' + c + ')" data-cols="' + c + '"' + (c === 2 ? ' class="active"' : '') + '>' + c + '</button>';
   html += '</span></div>';
   html += '<div class="supercard-grid drop-zone" data-drop-zone="true"></div>';
   html += '<div class="supercard-footer">';
@@ -1862,9 +1848,6 @@ function renderCard(cid, parentId, level) {
     }
   }
   updateSupercardCounts();
-
-  // Update column picker visibility
-  updateColPickerVisibility();
 }
 
 function renderChildren(children, parentId, layout) {
@@ -2178,111 +2161,6 @@ window.applyLayout = function(layout) {
     setGlobalColumns(layout.globalColumns);
   }
 })();
-
-// ── Per-zone Column Control ──
-function setZoneCols(id, n, type) {
-  var zone;
-  if (type === 'sc') {
-    zone = document.querySelector('.supercard[data-supercard-id="' + id + '"] .drop-zone');
-    // Update button states
-    document.querySelectorAll('.supercard[data-supercard-id="' + id + '"] .sc-col-picker button').forEach(function(b) {
-      b.classList.toggle('active', parseInt(b.dataset.col) === n);
-    });
-  } else {
-    zone = document.querySelector('.card[data-card-id="' + id + '"] .drop-subcard-zone');
-    if (!zone) zone = document.querySelector('.card[data-card-id="' + id + '"] .card-content + .drop-subcard-zone');
-    document.querySelectorAll('.card[data-card-id="' + id + '"] .card-col-picker button').forEach(function(b) {
-      b.classList.toggle('active', parseInt(b.dataset.col) === n);
-    });
-  }
-  if (!zone) return;
-  // Remove existing col classes
-  for (var ci = 1; ci <= 4; ci++) zone.classList.remove('zone-cols-' + ci);
-  if (n > 1) zone.classList.add('zone-cols-' + n);
-  // Save
-  var layout = getLayout();
-  if (layout) {
-    if (!layout.zoneCols) layout.zoneCols = {};
-    layout.zoneCols[id] = n;
-    saveLayoutObj(layout);
-  }
-}
-
-// ── Update column picker visibility based on content ──
-function addColPickerToFooter(card, cid) {
-  if (!card) return;
-  var footer = card.querySelector('.card-footer');
-  if (!footer) return;
-  // Check if picker already exists
-  if (footer.querySelector('.card-col-picker')) return;
-  var picker = document.createElement('span');
-  picker.className = 'card-col-picker';
-  picker.style.cssText = 'display:none;margin-left:6px;font-size:0.7rem;color:var(--text-dim)';
-  picker.innerHTML = '| Col: ';
-  for (var ci = 1; ci <= 4; ci++) {
-    var btn = document.createElement('button');
-    btn.textContent = ci;
-    btn.onclick = function(n) { return function() { setZoneCols(cid, n, 'nested'); }; }(ci);
-    btn.dataset.col = ci;
-    btn.style.cssText = 'background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;padding:0 4px;font-size:0.65rem';
-    if (ci === 2) btn.style.borderColor = 'var(--accent)';
-    picker.appendChild(btn);
-  }
-  footer.appendChild(picker);
-}
-
-function updateColPickerVisibility() {
-  // Supercards: show col picker if cards > 0
-  document.querySelectorAll('.supercard').forEach(function(sc) {
-    var sid = sc.dataset.supercardId;
-    var cards = sc.querySelectorAll(':scope > .drop-zone > .card[data-card-id]');
-    sc.classList.toggle('has-cards', cards.length > 0);
-    // Restore saved column count
-    var layout = getLayout();
-    if (layout && layout.zoneCols && layout.zoneCols[sid]) {
-      setZoneCols(sid, layout.zoneCols[sid], 'sc');
-    }
-  });
-  // Cards: show col picker if subcards > 0
-  document.querySelectorAll('.card[data-card-id]').forEach(function(card) {
-    var cid = card.dataset.cardId;
-    if (!cid) return;
-    var subcards = card.querySelectorAll(':scope > .drop-subcard-zone > .card[data-card-id]');
-    card.classList.toggle('has-subcards', subcards.length > 0);
-    // Add column picker to footer if card has or could have subcards
-    addColPickerToFooter(card, cid);
-    // Restore saved column count
-    var layout = getLayout();
-    if (layout && layout.zoneCols && layout.zoneCols[cid]) {
-      setZoneCols(cid, layout.zoneCols[cid], 'nested');
-    }
-  });
-}
-
-// Extend existing functions to call updateColPickerVisibility
-var __origAddCard = window.addCard || function(){};
-window.addCard = function(sid) {
-  if (__origAddCard) __origAddCard(sid);
-  setTimeout(updateColPickerVisibility, 50);
-};
-
-var __origAddNested = window.addNestedCard || function(){};
-window.addNestedCard = function(pid, level) {
-  if (__origAddNested) __origAddNested(pid, level);
-  setTimeout(updateColPickerVisibility, 50);
-};
-
-var __origDeleteCard = window.deleteCard || function(){};
-window.deleteCard = function(cid) {
-  if (__origDeleteCard) __origDeleteCard(cid);
-  setTimeout(updateColPickerVisibility, 100);
-};
-
-// Extend the existing drop handler to update visibility
-// The drop handler is registered with addEventListener, so we add another listener
-document.addEventListener('drop', function(e) {
-  setTimeout(updateColPickerVisibility, 100);
-});
 </script>
 
 
