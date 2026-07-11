@@ -5,3 +5,4 @@ __pycache__/
 .recovery_state.json
 debug_test.py
 /tmp/
+*.log

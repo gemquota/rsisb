@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSIS Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --surface2: #21262d; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff; --green: #3fb950;
+  --yellow: #d29922; --red: #f85149; --purple: #bc8cff;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 16px 0; flex-shrink: 0; }
+.sidebar h1 { font-size: 13px; font-weight: 600; padding: 0 16px 12px; color: var(--accent); letter-spacing: 0.5px; }
+.sidebar .version { font-size: 11px; color: var(--text2); padding: 0 16px 16px; margin-top: -8px; }
+.nav-item { padding: 8px 16px; cursor: pointer; font-size: 13px; color: var(--text2); transition: .15s; display: flex; align-items: center; gap: 8px; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--surface2); color: var(--accent); border-left: 3px solid var(--accent); }
+.main { flex: 1; padding: 20px 24px; overflow-y: auto; max-height: 100vh; }
+.tab { display: none; } .tab.active { display: block; }
+h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+h3 { font-size: 14px; font-weight: 500; color: var(--text2); margin-bottom: 10px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.stat-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+.stat-label { color: var(--text2); } .stat-value { font-weight: 500; }
+.stat-good { color: var(--green); } .stat-warn { color: var(--yellow); } .stat-bad { color: var(--red); }
+.layer-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+.layer-score { font-size: 28px; font-weight: 700; }
+.layer-name { font-size: 11px; color: var(--text2); margin-top: 3px; }
+.layer-bar { height: 5px; background: var(--surface2); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+.layer-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+.chart-container { height: 220px; margin-top: 8px; }
+.btn { background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: .15s; }
+.btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+input, select { background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; font-size: 13px; font-family: var(--font); }
+.api-bar { display: flex; gap: 8px; align-items: center; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.api-bar input { flex: 1; }
+.api-bar label { font-size: 12px; color: var(--text2); white-space: nowrap; }
+.api-status { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+.api-ok { background: #1a3a1a; color: var(--green); }
+.api-err { background: #3a1a1a; color: var(--red); }
+.axiom-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin: 2px; background: var(--surface2); border: 1px solid var(--border); }
+.pulse-item { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; cursor: pointer; }
+.pulse-item:hover { color: var(--accent); }
+pre { font-size: 11px; color: var(--text2); overflow-x: auto; max-height: 360px; }
+.chat-box { height: 320px; overflow-y: auto; background: var(--surface2); border-radius: 8px; padding: 14px; margin-bottom: 10px; font-size: 13px; }
+.chat-msg { margin-bottom: 10px; }
+.chat-user { color: var(--purple); font-weight: 500; }
+.chat-system { color: var(--green); font-weight: 500; }
+.chat-text { margin-top: 2px; line-height: 1.5; }
+.status-banner { padding: 6px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 12px; display: none; }
+.status-ok { display: block; background: #1a3a1a; color: var(--green); }
+.status-err { display: block; background: #3a1a1a; color: var(--red); }
+@media (max-width: 768px) { .layout { flex-direction: column; } .sidebar { width: 100%; border-right: none; } .api-bar { flex-wrap: wrap; } .main { padding: 12px; } }
+</style>
+</head>
+<body>
+
+<div class="api-bar" id="apiBar">
+  <label>Telemetry API:</label>
+  <input type="text" id="apiUrlInput" placeholder="http://localhost:8080" value="">
+  <button class="btn btn-primary" onclick="connectAPI()">Connect</button>
+  <span id="apiStatus" class="api-status">Disconnected</span>
+  <span style="font-size:11px;color:var(--text2);margin-left:auto">
+    <a href="#" onclick="document.getElementById('apiUrlInput').value='https://mug-sydney-wilderness-rug.trycloudflare.com';connectAPI();return false" style="color:var(--accent)">Live</a>
+    <span style="color:var(--border)">|</span>
+    <a href="#" onclick="document.getElementById('apiUrlInput').value='http://localhost:8080';connectAPI();return false" style="color:var(--accent)">Local</a>
+  </span>
+</div>
+
+<div class="layout">
+<nav class="sidebar">
+  <h1>RSIS Dashboard</h1>
+  <div class="version" id="sidebarVersion">Not connected</div>
+  <div class="nav-item active" data-tab="dashboard"><span>◈</span> Dashboard</div>
+  <div class="nav-item" data-tab="telemetry"><span>▦</span> Telemetry</div>
+  <div class="nav-item" data-tab="chat"><span>💬</span> Chat</div>
+  <div class="nav-item" data-tab="identity"><span>◎</span> Identity</div>
+</nav>
+
+<main class="main">
+
+<div class="tab active" id="tab-dashboard">
+  <div id="dashStatusBanner" class="status-banner"></div>
+  <h2>System Dashboard</h2>
+  <div class="card-grid">
+    <div class="card"><h3>System Status</h3><div id="dashStatus"></div></div>
+    <div class="card"><h3>Success Metrics</h3><div id="dashMetrics"></div></div>
+  </div>
+  <h3>Layer Scores</h3>
+  <div class="card-grid" id="layerGrid"></div>
+  <div class="card"><h3>Layer Score Timeline</h3>
+    <div class="chart-container"><canvas id="timelineChart"></canvas></div>
+  </div>
+</div>
+
+<div class="tab" id="tab-telemetry">
+  <h2>Telemetry Browser</h2>
+  <div class="card-grid">
+    <div class="card"><h3>Pulse Logs</h3><div id="pulseList"></div></div>
+    <div class="card"><h3>Pulse Detail</h3><div id="pulseDetail"><p style="color:var(--text2)">Select a pulse.</p></div></div>
+  </div>
+  <div class="card-grid">
+    <div class="card"><h3>Knowledge Graph</h3><div id="kgStats"></div></div>
+    <div class="card"><h3>Latest Snapshot</h3><div id="snapshotInfo"></div></div>
+  </div>
+</div>
+
+<div class="tab" id="tab-chat">
+  <h2>System Chat</h2>
+  <div class="card">
+    <div class="chat-box" id="chatBox">
+      <div class="chat-msg"><span class="chat-system">System:</span><div class="chat-text">Connected to <span id="chatApiLabel">—</span>. Ask me about the system.</div></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="chatInput" placeholder="Ask about scores, layers, purpose..." style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="btn btn-primary" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<div class="tab" id="tab-identity">
+  <h2>Identity Viewer</h2>
+  <div class="card-grid">
+    <div class="card"><h3>Self-Concept</h3><div id="selfConceptDisplay"></div></div>
+    <div class="card"><h3>Core Beliefs</h3><div id="beliefsDisplay"></div></div>
+  </div>
+  <div class="card-grid">
+    <div class="card"><h3>Value Axioms</h3><div id="axiomDisplay"></div></div>
+    <div class="card"><h3>Snapshots</h3><div id="snapshotList"></div></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// === State ===
+var API = '';
+var timelineChart = null;
+
+// === Auto-connect from URL param or localStorage ===
+(function() {
+  var saved = localStorage.getItem('rsis_api_url');
+  var params = new URLSearchParams(window.location.search);
+  var url = params.get('api') || saved || '';
+  document.getElementById('apiUrlInput').value = url;
+  if (url) connectAPI();
+})();
+
+// === API connection ===
+function connectAPI() {
+  var url = document.getElementById('apiUrlInput').value.trim();
+  if (!url) return;
+  if (url.endsWith('/')) url = url.slice(0, -1);
+  API = url;
+  localStorage.setItem('rsis_api_url', url);
+  document.getElementById('apiStatus').textContent = 'Connecting...';
+  document.getElementById('apiStatus').className = 'api-status';
+  fetchAPI('/api/status')
+    .then(function(data) {
+      document.getElementById('apiStatus').textContent = 'Connected v' + data.version;
+      document.getElementById('apiStatus').className = 'api-status api-ok';
+      document.getElementById('sidebarVersion').textContent = 'v' + data.version;
+      document.getElementById('chatApiLabel').textContent = url;
+      loadDashboard();
+      loadTelemetry();
+      loadIdentity();
+    })
+    ['catch'](function(err) {
+      document.getElementById('apiStatus').textContent = 'Connection failed';
+      document.getElementById('apiStatus').className = 'api-status api-err';
+      document.getElementById('sidebarVersion').textContent = 'Disconnected';
+      showBanner('err', 'Could not connect to ' + url + '. Check the address and try again.');
+    });
+}
+
+function fetchAPI(path) {
+  return fetch(API + path).then(function(r) {
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  });
+}
+
+function postAPI(path, body) {
+  return fetch(API + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function(r) { return r.json(); });
+}
+
+function showBanner(type, msg) {
+  var b = document.getElementById('dashStatusBanner');
+  b.textContent = msg;
+  b.className = 'status-banner status-' + type;
+}
+
+// === Navigation ===
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    item.classList.add('active');
+    document.getElementById('tab-' + item.dataset.tab).classList.add('active');
+    if (item.dataset.tab === 'dashboard') loadDashboard();
+    if (item.dataset.tab === 'telemetry') loadTelemetry();
+    if (item.dataset.tab === 'identity') loadIdentity();
+  });
+});
+
+// === Dashboard ===
+function loadDashboard() {
+  if (!API) return;
+  Promise.all([
+    fetchAPI('/api/status'),
+    fetchAPI('/api/self-model/concept'),
+    fetchAPI('/api/health'),
+    fetchAPI('/api/layers'),
+    fetchAPI('/api/metrics/timeline')
+  ]).then(function(results) {
+    var status = results[0], concept = results[1], health = results[2], layers = results[3], timeline = results[4];
+    renderStatus(status, concept, health);
+    renderLayers(layers.layers);
+    renderTimeline(timeline.timeline);
+    showBanner('ok', 'Connected — v' + status.version + ' | Health: ' + (health.healthy ? 'OK' : 'CRISIS'));
+  })['catch'](function(err) {
+    showBanner('err', 'Failed to load dashboard: ' + err.message);
+  });
+}
+
+function renderStatus(status, concept, health) {
+  var sr = status.success_rate;
+  var srColor = sr > 10 ? 'var(--green)' : sr > 5 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('dashStatus').innerHTML =
+    '<div class="stat-row"><span class="stat-label">Version</span><span class="stat-value">' + status.version + '</span></div>' +
+    '<div class="stat-row"><span class="stat-label">KG Nodes</span><span class="stat-value">' + status.kg_nodes_raw + ' / ' + status.kg_nodes_consolidated + '</span></div>' +
+    '<div class="stat-row"><span class="stat-label">Snapshots</span><span class="stat-value">' + status.snapshot_count + '</span></div>' +
+    '<div class="stat-row"><span class="stat-label">Narrative</span><span class="stat-value" style="font-size:11px">' + escapeHtml((concept.current_narrative || '').slice(0,80)) + '</span></div>';
+  document.getElementById('dashMetrics').innerHTML =
+    '<div class="stat-row"><span class="stat-label">Attempts</span><span class="stat-value">' + status.total_attempts + '</span></div>' +
+    '<div class="stat-row"><span class="stat-label">Successful</span><span class="stat-value stat-good">' + status.successful_applications + '</span></div>' +
+    '<div class="stat-row"><span class="stat-label">Rate</span><span class="stat-value" style="color:' + srColor + '">' + sr + '%</span></div>' +
+    '<div class="stat-row"><span class="stat-label">Health</span><span class="stat-value ' + (health.healthy ? 'stat-good' : 'stat-bad') + '">' + (health.healthy ? 'OK' : 'CRISIS') + '</span></div>';
+}
+
+function renderLayers(layers) {
+  var grid = document.getElementById('layerGrid');
+  grid.innerHTML = '';
+  var names = {L1:'Execution',L2:'Planning',L3:'Self-Direction',L4:'Optimizer',L5:'Evolution',L6:'Identity'};
+  Object.keys(names).forEach(function(lid) {
+    if (!layers[lid]) return;
+    var score = layers[lid].score || 0;
+    var color = score >= 60 ? 'var(--green)' : score >= 30 ? 'var(--yellow)' : 'var(--red)';
+    var card = document.createElement('div');
+    card.className = 'layer-card';
+    card.innerHTML = '<div class="layer-score" style="color:' + color + '">' + Math.round(score) + '</div>' +
+      '<div class="layer-name">' + lid + ': ' + names[lid] + '</div>' +
+      '<div class="layer-bar"><div class="layer-fill" style="width:' + score + '%;background:' + color + '"></div></div>';
+    grid.appendChild(card);
+  });
+}
+
+function renderTimeline(timeline) {
+  var ctx = document.getElementById('timelineChart').getContext('2d');
+  if (timelineChart) timelineChart.destroy();
+  if (!timeline || timeline.length === 0) {
+    ctx.canvas.parentElement.innerHTML = '<p style="color:var(--text2);padding:30px;text-align:center">No timeline data. Take snapshots via the API.</p>';
+    return;
+  }
+  var labels = timeline.map(function(t) { return 'S#' + t.snapshot_id; });
+  var datasets = [];
+  var ids = ['L1','L2','L3','L4','L5','L6'];
+  var colors = ['#3fb950','#58a6ff','#d29922','#bc8cff','#f85149','#79c0ff'];
+  ids.forEach(function(lid, i) {
+    datasets.push({
+      label: lid,
+      data: timeline.map(function(t) { return t[lid] || 0; }),
+      borderColor: colors[i],
+      backgroundColor: colors[i] + '22',
+      fill: true, tension: 0.3, pointRadius: 3
+    });
+  });
+  timelineChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#8b949e' } } },
+      scales: {
+        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+        y: { min: 0, max: 100, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+      }
+    }
+  });
+}
+
+// === Telemetry ===
+function loadTelemetry() {
+  if (!API) return;
+  Promise.all([fetchAPI('/api/pulses?limit=20'), fetchAPI('/api/knowledge-graph'), fetchAPI('/api/snapshots')])
+    .then(function(results) {
+      var pulses = results[0], kg = results[1], snaps = results[2];
+      var list = document.getElementById('pulseList');
+      list.innerHTML = (pulses.pulses || []).length === 0
+        ? '<p style="color:var(--text2)">No pulses found.</p>'
+        : pulses.pulses.map(function(p) {
+            return '<div class="pulse-item" onclick="showPulse(' + p.pulse_id + ')">' +
+              '<strong>Pulse ' + p.pulse_id + '</strong> ' +
+              '<span style="color:var(--text2);margin-left:8px">' + (p.phase || '') + '</span>' +
+              '<span style="float:right">' + (p.decision || '') + '</span></div>';
+          }).join('');
+      document.getElementById('kgStats').innerHTML =
+        '<div class="stat-row"><span class="stat-label">Raw Nodes</span><span class="stat-value">' + (kg.total_nodes_raw || 0) + '</span></div>' +
+        '<div class="stat-row"><span class="stat-label">Consolidated</span><span class="stat-value">' + (kg.total_nodes_consolidated || 0) + '</span></div>' +
+        '<div class="stat-row"><span class="stat-label">Density</span><span class="stat-value">' + (kg.utility_density || 0) + '%</span></div>';
+      var s = (snaps.snapshots || []);
+      document.getElementById('snapshotInfo').innerHTML = s.length === 0
+        ? '<p style="color:var(--text2)">No snapshots.</p>'
+        : '<div class="stat-row"><span class="stat-label">Total</span><span class="stat-value">' + s.length + '</span></div>' +
+          '<div class="stat-row"><span class="stat-label">Latest</span><span class="stat-value">#' + s[s.length-1].snapshot_id + '</span></div>';
+    });
+}
+
+function showPulse(id) {
+  fetchAPI('/api/pulses/' + id).then(function(pulse) {
+    document.getElementById('pulseDetail').innerHTML =
+      '<pre>' + escapeHtml(JSON.stringify(pulse, null, 2)) + '</pre>';
+  })['catch'](function() {
+    document.getElementById('pulseDetail').innerHTML = '<p style="color:var(--red)">Failed to load pulse.</p>';
+  });
+}
+
+// === Chat ===
+var chatContext = [];
+
+function sendChat() {
+  var input = document.getElementById('chatInput');
+  var msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  var box = document.getElementById('chatBox');
+  box.innerHTML += '<div class="chat-msg"><span class="chat-user">You:</span><div class="chat-text">' + escapeHtml(msg) + '</div></div>';
+  box.scrollTop = box.scrollHeight;
+  chatContext.push({ role: 'user', content: msg });
+
+  fetchAPI('/api/self-model/concept').then(function(concept) {
+    fetchAPI('/api/status').then(function(status) {
+      var lower = msg.toLowerCase();
+      var reply = '';
+      if (lower.includes('hello') || lower === 'hi') {
+        reply = 'Connected to RSIS v' + status.version + '. Purpose: "' + concept.purpose + '". How can I help?';
+      } else if (lower.includes('purpose') || lower.includes('why')) {
+        reply = 'My purpose: "' + concept.purpose + '"';
+      } else if (lower.includes('score') || lower.includes('layer')) {
+        var ls = status.layer_scores;
+        reply = Object.keys(ls).map(function(k) { return k + ': ' + Math.round(ls[k].score) + '/100'; }).join(', ');
+      } else if (lower.includes('narrative')) {
+        reply = 'Current narrative: "' + concept.current_narrative + '"';
+      } else if (lower.includes('belief')) {
+        reply = 'Core beliefs: ' + concept.core_beliefs.join(', ');
+      } else if (lower.includes('health') || lower.includes('crisis')) {
+        fetchAPI('/api/health').then(function(h) {
+          var r = h.healthy ? 'All health checks passing.' : 'CRISIS: ' + h.violations.join('; ');
+          appendReply(r);
+        });
+        return;
+      } else if (lower.includes('help')) {
+        reply = 'Ask about: scores, layers, purpose, narrative, beliefs, health.';
+      } else {
+        reply = 'I received your message. Try asking about my purpose, layers, scores, or beliefs.';
+      }
+      appendReply(reply);
+    });
+  });
+
+  function appendReply(text) {
+    box.innerHTML += '<div class="chat-msg"><span class="chat-system">RSIS:</span><div class="chat-text">' + escapeHtml(text) + '</div></div>';
+    box.scrollTop = box.scrollHeight;
+  }
+}
+
+// === Identity ===
+function loadIdentity() {
+  if (!API) return;
+  Promise.all([fetchAPI('/api/self-model'), fetchAPI('/api/value-axioms'), fetchAPI('/api/snapshots')])
+    .then(function(results) {
+      var sm = results[0], axioms = results[1], snaps = results[2];
+      var sc = sm.self_concept || {};
+      document.getElementById('selfConceptDisplay').innerHTML =
+        '<div style="margin-bottom:8px"><strong>Purpose</strong></div>' +
+        '<p style="font-size:12px;color:var(--text2);margin-bottom:10px">' + escapeHtml(sc.purpose || '') + '</p>' +
+        '<div style="margin-bottom:4px"><strong>Narrative</strong></div>' +
+        '<p style="font-size:12px;color:var(--text2)">' + escapeHtml(sc.current_narrative || '') + '</p>';
+      document.getElementById('beliefsDisplay').innerHTML =
+        '<div style="margin-bottom:8px">' +
+        (sc.core_beliefs || []).map(function(b) { return '<span class="axiom-tag">' + escapeHtml(b) + '</span>'; }).join('') + '</div>' +
+        '<div><strong style="font-size:12px">Aspirations</strong></div>' +
+        (sc.aspirations || []).map(function(a) { return '<div style="font-size:12px;padding:2px 0;color:var(--text2)">' + escapeHtml(a) + '</div>'; }).join('');
+      document.getElementById('axiomDisplay').innerHTML = Object.keys(axioms.axioms || {}).length === 0
+        ? '<p style="color:var(--text2)">No axiom data.</p>'
+        : Object.keys(axioms.axioms).map(function(n) {
+            var s = axioms.axioms[n];
+            return '<div class="stat-row"><span class="stat-label">' + n + '</span><span class="stat-value">x' + (s.reinforced_count || 0) + ' (w:' + (axioms.weights[n] || 1).toFixed(1) + ')</span></div>';
+          }).join('');
+      var s = snaps.snapshots || [];
+      document.getElementById('snapshotList').innerHTML = s.length === 0
+        ? '<p style="color:var(--text2)">No snapshots.</p>'
+        : s.slice().reverse().slice(0, 15).map(function(sn) {
+            return '<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">#' + sn.snapshot_id + ' — ' + new Date(sn.timestamp * 1000).toLocaleString() + '</div>';
+          }).join('');
+    });
+}
+
+// === Utils ===
+function escapeHtml(text) {
+  var d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
