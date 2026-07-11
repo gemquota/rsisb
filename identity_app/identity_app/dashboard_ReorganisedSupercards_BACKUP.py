@@ -1,0 +1,1133 @@
+"""Dashboard — Web dashboard for the Identity App.
+
+Provides a real-time visualization of identity state using FastAPI
+with Jinja2 templates for server-side rendering.
+"""
+
+import time
+import json
+from typing import Optional
+from pathlib import Path
+from datetime import datetime, timezone
+
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+from identity_app.core import SelfModel
+from identity_app.values import ValueAxiomSystem, ValueAlignment, DriftDetector
+from identity_app.snapshot import SnapshotManager, SnapshotDiff, Timeline, SnapshotScheduler
+from identity_app.crisis import CrisisMonitor, CrisisPredictor, RecoveryPlanner
+
+
+# ── Inline HTML Dashboard ───────────────────────────────────────
+# (Self-contained single-page dashboard to avoid template file dependencies)
+
+DASHBOARD_HTML = r"""<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Identity Dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --orange: #db6d28;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 20px;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 24px;
+  }
+  .header h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 8px; }
+  .header .version { color: var(--text-dim); font-size: 0.85rem; }
+  .header .crisis-badge {
+    padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
+  }
+  .crisis-badge.active { background: var(--red); color: white; }
+  .crisis-badge.inactive { background: var(--green); color: white; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;
+  }
+  .card h2 { font-size: 1rem; margin-bottom: 12px; color: var(--accent); }
+  .card h3 { font-size: 0.85rem; margin: 8px 0 4px; color: var(--text-dim); }
+
+  .score-bar { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .score-bar .label { width: 120px; font-weight: 600; font-size: 0.8rem; }
+  .score-bar .bar-track { flex: 1; height: 18px; background: #21262d; border-radius: 4px; overflow: hidden; }
+  .score-bar .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .score-bar .value { width: 30px; text-align: right; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+
+  .trait-bar .bar-fill { background: var(--accent); }
+  .layer-bar .bar-fill { background: var(--green); }
+  .axiom-bar .bar-fill { background: var(--yellow); }
+
+  .narrative-box {
+    background: #0d1117; border: 1px solid var(--border); border-radius: 6px;
+    padding: 12px; font-style: italic; color: var(--text-dim); font-size: 0.9rem; min-height: 60px;
+  }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
+  .stat { padding: 8px; }
+  .stat .num { font-size: 1.5rem; font-weight: 700; }
+  .stat .lbl { font-size: 0.75rem; color: var(--text-dim); }
+
+  .timeline-list { max-height: 300px; overflow-y: auto; }
+  .tl-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+  }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-item .tl-time { color: var(--text-dim); font-size: 0.75rem; }
+  .tl-item .tl-tag { color: var(--accent); }
+  .tl-item .tl-scores { display: flex; gap: 6px; }
+
+  .milestone {
+    background: linear-gradient(135deg, rgba(88,166,255,0.1), rgba(63,185,80,0.05));
+    border: 1px solid var(--accent); border-radius: 6px; padding: 8px 12px; margin: 4px 0;
+    font-size: 0.85rem;
+  }
+  .milestone .reason { color: var(--accent); }
+
+  .refresh-bar {
+    display: flex; justify-content: flex-end; align-items: center; gap: 12px;
+    padding: 12px 0; font-size: 0.85rem; color: var(--text-dim);
+  }
+  .refresh-bar button {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+  }
+  .refresh-bar button:hover { border-color: var(--accent); }
+  .auto-refresh { display: flex; align-items: center; gap: 6px; }
+
+  .status-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
+  }
+  .status-dot.green { background: var(--green); }
+  .status-dot.yellow { background: var(--yellow); }
+  .status-dot.red { background: var(--red); }
+
+  .subcard {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px 12px;
+  }
+  .axiom-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 0.75rem; margin: 2px;
+    background: var(--surface); border: 1px solid var(--border); color: var(--accent);
+  }
+  .drift-warning {
+    background: rgba(210, 153, 34, 0.1); border: 1px solid var(--yellow);
+    border-radius: 6px; padding: 10px; margin: 8px 0; font-size: 0.85rem;
+  }
+
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🪪 Identity Dashboard <span class="version" id="version">v—</span> <span style="font-size:0.7rem;color:var(--text-dim);font-weight:400">semver</span></h1>
+  </div>
+  <div>
+    <span class="crisis-badge inactive" id="crisisBadge">✅ Healthy</span>
+  </div>
+</div>
+
+<div class="refresh-bar">
+  <div class="auto-refresh">
+    <input type="checkbox" id="autoRefresh" checked>
+    <label for="autoRefresh">Auto-refresh (10s)</label>
+  </div>
+  <button onclick="loadAll()">⟳ Refresh Now</button>
+  <span id="lastUpdated">—</span>
+</div>
+
+<div class="grid">
+  <!-- Narrative -->
+  <div class="card">
+    <h2>📖 Current Narrative</h2>
+    <div class="narrative-box" id="narrative">Loading...</div>
+  </div>
+
+  <!-- Self-Concept -->
+  <div class="card">
+    <h2>🎯 Self-Concept</h2>
+    <div id="selfConceptContent">
+      <div id="scSummary" style="font-size:0.85rem;line-height:1.6;color:var(--text);font-style:italic;margin-bottom:12px">Loading...</div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Core Beliefs</div>
+        <div id="scCoreBeliefs"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Self Image -->
+  <div class="card">
+    <h2>🪞 Self Image</h2>
+    <div id="selfImageContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+  <!-- Self Perception -->
+  <div class="card">
+    <h2>👁️ Self Perception</h2>
+    <div id="selfPerceptionContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+  <!-- Personality -->
+  <div class="card">
+    <h2>🧠 Personality</h2>
+    <div id="personalityContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+  <!-- Characteristics -->
+  <div class="card">
+    <h2>🏷️ Characteristics</h2>
+    <div id="characteristicsContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+  <!-- Skills -->
+  <div class="card">
+    <h2>⚡ Skills</h2>
+    <div id="skillsContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+  <!-- Roles -->
+  <div class="card">
+    <h2>🎭 Roles</h2>
+    <div id="rolesContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+  <!-- Identity Coherence -->
+  <div class="card">
+    <h2>🔗 Identity Coherence</h2>
+    <div id="coherenceContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+  <!-- Self-Narrative -->
+  <div class="card">
+    <h2>📖 Self-Narrative</h2>
+    <div id="selfNarrativeContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+  <!-- Purpose (expanded) -->
+  <div class="card">
+    <h2>💡 Purpose</h2>
+    <div id="purposeContent">
+      <div id="purposeStatement" style="font-size:0.85rem;font-style:italic;line-height:1.6;color:var(--text);margin-bottom:12px">Loading...</div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">Clarity</div>
+        <div id="purposeClarityBar"><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:85%;background:var(--green);border-radius:3px"></div></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-dim);margin-top:2px">
+          <span>Developing</span><span>Articulated</span><span>✧ Refined</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">Alignment</div>
+        <div id="purposeAlignment" style="font-size:0.85rem">Loading...</div>
+      </div>
+    </div>
+  </div>
+  <!-- Self-Description -->
+  <div class="card">
+    <h2>📝 Self-Description</h2>
+    <div id="descriptionContent" style="font-size:0.85rem;line-height:1.6;color:var(--text)">Loading...</div>
+  </div>
+  <!-- Beliefs -->
+  <div class="card">
+    <h2>📜 Beliefs</h2>
+    <div id="beliefsContent">
+
+      <div style="margin-top:8px"><strong style="font-size:0.85rem">Active Beliefs</strong></div>
+      <div id="beliefsList" style="font-size:0.85rem;color:var(--text-dim);margin-top:4px">Loading...</div>
+    </div>
+  </div>
+  <!-- Expanded Aspirations -->
+  <div class="card">
+    <h2>✨ Aspirations</h2>
+    <div id="aspirationsContent">
+      <div id="aspirationsList" style="font-size:0.85rem">Loading...</div>
+    </div>
+  </div>
+  <!-- Identity Vital Signs -->
+  <div class="card">
+    <h2>🩺 Identity Vital Signs</h2>
+    <div id="vitalSignsContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+  <!-- Identity Evolution -->
+  <div class="card">
+    <h2>📈 Identity Evolution</h2>
+    <div id="evolutionContent" style="font-size:0.85rem">Loading...</div>
+  </div>
+
+
+  <!-- Crisis Status -->
+  <div class="card">
+    <h2>🚨 Crisis Status</h2>
+    <div id="crisisContent">
+      <div class="stat-grid">
+        <div class="stat"><div class="num" id="crisisSeverity">—</div><div class="lbl">Severity</div></div>
+        <div class="stat"><div class="num" id="crisisCount">—</div><div class="lbl">Total Crises</div></div>
+        <div class="stat"><div class="num" id="violations">—</div><div class="lbl">Violations</div></div>
+        <div class="stat"><div class="num" id="riskLevel">—</div><div class="lbl">Risk Level</div></div>
+      </div>
+      <div id="driftInfo"></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <!-- Layer Scores -->
+  <div class="card">
+    <h2>📊 Layer Scores</h2>
+    <div id="layerScores"></div>
+  </div>
+
+  <!-- Identity Traits -->
+  <div class="card">
+    <h2>🧬 Identity Traits</h2>
+    <div id="traits"></div>
+  </div>
+</div>
+
+<div class="grid">
+  <!-- Value Axioms -->
+  <div class="card">
+    <h2>⚖️ Value Axioms</h2>
+    <div id="axioms"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="card">
+    <h2>📈 System Stats</h2>
+    <div class="stat-grid">
+      <div class="stat"><div class="num" id="statSnapshots">—</div><div class="lbl">Snapshots</div></div>
+      <div class="stat"><div class="num" id="statAttempts">—</div><div class="lbl">Attempts</div></div>
+      <div class="stat"><div class="num" id="statSuccessRate">—</div><div class="lbl">Success Rate</div></div>
+      <div class="stat"><div class="num" id="statBalance">—</div><div class="lbl">Axiom Balance</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="card">
+  <h2>📅 Snapshot Timeline</h2>
+  <div id="timelineContent"></div>
+</div>
+
+<script>
+const API = window.location.origin;
+
+async function fetchJSON(path) {
+  const r = await fetch(API + path);
+  return r.json();
+}
+
+function barHTML(label, value, max, cls, color) {
+  const pct = Math.min(100, (value / max) * 100);
+  const c = color || 'var(--accent)';
+  return `<div class="score-bar ${cls}">
+    <span class="label">${label}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c}"></div></div>
+    <span class="value">${value.toFixed(0)}</span>
+  </div>`;
+}
+
+function statusDot(healthy) {
+  return `<span class="status-dot ${healthy ? 'green' : 'red'}"></span>`;
+}
+
+async function loadStatus() {
+  try {
+    const status = await fetchJSON('/api/status');
+    document.getElementById('version').textContent = 'v' + status.version;
+    document.getElementById('statSnapshots').textContent = status.snapshot_count;
+    document.getElementById('statAttempts').textContent = status.total_attempts;
+    document.getElementById('statSuccessRate').textContent = status.success_rate.toFixed(0) + '%';
+
+    // Crisis badge
+    const badge = document.getElementById('crisisBadge');
+    if (status.crisis_active) {
+      badge.className = 'crisis-badge active';
+      badge.textContent = '🚨 Crisis Active';
+    } else {
+      badge.className = 'crisis-badge inactive';
+      badge.textContent = '✅ Healthy';
+    }
+    document.getElementById('crisisCount').textContent = status.crisis_count;
+  } catch (e) {
+    console.error('Status load error:', e);
+  }
+}
+
+async function loadNarrative() {
+  try {
+    const data = await fetchJSON('/api/self/narrative');
+    document.getElementById('narrative').textContent = data.narrative || '(no narrative set)';
+  } catch (e) { document.getElementById('narrative').textContent = 'Error loading narrative'; }
+}
+
+async function loadLayerScores() {
+  try {
+    const status = await fetchJSON('/api/status');
+    const scores = status.layer_scores;
+    let html = '';
+    for (const [lid, score] of Object.entries(scores)) {
+      const c = score >= 50 ? 'var(--green)' : (score >= 20 ? 'var(--yellow)' : 'var(--red)');
+      html += barHTML(lid, score, 100, 'layer-bar', c);
+    }
+    document.getElementById('layerScores').innerHTML = html || '<div class="text-dim">No data</div>';
+  } catch (e) { document.getElementById('layerScores').textContent = 'Error'; }
+}
+
+async function loadTraits() {
+  try {
+    const data = await fetchJSON('/api/self/traits');
+    let html = '';
+    for (const [name, t] of Object.entries(data)) {
+      const score = typeof t === 'object' ? t.score : t;
+      const label = name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      html += barHTML(label, score, 100, 'trait-bar');
+    }
+    document.getElementById('traits').innerHTML = html || '<div class="text-dim">No traits</div>';
+  } catch (e) { document.getElementById('traits').textContent = 'Error'; }
+}
+
+async function loadValues() {
+  try {
+    const data = await fetchJSON('/api/values');
+    let html = '';
+    for (const [name, state] of Object.entries(data.axioms)) {
+      const weight = state.weight || 1.0;
+      const capped = Math.min(200, weight * 20);
+      html += barHTML(name, capped, 100, 'axiom-bar', 'var(--yellow)');
+    }
+    document.getElementById('axioms').innerHTML = html;
+    document.getElementById('statBalance').textContent = data.balance_score.toFixed(0) + '%';
+  } catch (e) { document.getElementById('axioms').textContent = 'Error'; }
+}
+
+async function loadSelfConcept() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const sc = data.self_concept || {};
+    var purpose = sc.purpose || '';
+    var desc = sc.self_description || '';
+    var text = '';
+    if (purpose) text += purpose;
+    if (desc && text) text += ' — ';
+    else if (desc) text += desc;
+    document.getElementById('scSummary').textContent = text || '(not set)';
+    // Core beliefs as tags
+    var cb = document.getElementById('scCoreBeliefs');
+    if (sc.core_beliefs && sc.core_beliefs.length > 0) {
+      cb.innerHTML = sc.core_beliefs.map(function(b) {
+        return '<span style="display:inline-block;padding:3px 10px;border-radius:10px;font-size:0.8rem;margin:2px 4px 2px 0;background:var(--surface2);border:1px solid var(--border);color:var(--accent)">' + b + '</span>';
+      }).join('');
+    } else {
+      cb.innerHTML = '(none)';
+    }
+  } catch (e) { console.error('Self-concept load error:', e); }
+}
+
+async function loadSelfImage() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const sc = data.self_concept || {};
+    const traits = data.traits || {};
+    var avgTrait = 0, tCount = 0;
+    for (var k in traits) { if (traits.hasOwnProperty(k)) { avgTrait += (typeof traits[k] === 'object' ? (traits[k].score || 0) : traits[k]); tCount++; } }
+    avgTrait = tCount > 0 ? Math.round(avgTrait / tCount) : 50;
+    var selfImage = '';
+    if (sc.self_description) selfImage += '<div style="margin-bottom:8px"><strong>Identity:</strong> ' + sc.self_description.split('.')[0] + '.</div>';
+    selfImage += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">';
+    selfImage += '<div class="stat"><div class="num">' + avgTrait + '</div><div class="lbl">Avg Trait Score</div></div>';
+    selfImage += '<div class="stat"><div class="num">' + Object.keys(traits).length + '</div><div class="lbl">Dimensions</div></div>';
+    selfImage += '</div>';
+    // Identity strength meter
+    var strength = Math.min(100, avgTrait + 10);
+    var sColor = strength >= 70 ? 'var(--green)' : (strength >= 40 ? 'var(--yellow)' : 'var(--red)');
+    selfImage += '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:3px">Identity Strength</div>' +
+      '<div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">' +
+      '<div style="height:100%;width:' + strength + '%;background:' + sColor + ';border-radius:3px"></div></div>';
+    document.getElementById('selfImageContent').innerHTML = selfImage;
+  } catch (e) { console.error('Self image error:', e); }
+}
+
+async function loadSelfPerception() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const status = await fetchJSON('/api/status');
+    const beliefs = data.beliefs || {};
+    var avgConf = 0, bCount = 0;
+    for (var k in beliefs) { if (beliefs.hasOwnProperty(k)) { avgConf += (beliefs[k].confidence || 0); bCount++; } }
+    avgConf = bCount > 0 ? (avgConf / bCount) : 0.5;
+    var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">';
+    html += '<div class="stat"><div class="num">' + (avgConf * 100).toFixed(0) + '%</div><div class="lbl">Self-Knowledge</div></div>';
+    html += '<div class="stat"><div class="num">' + status.success_rate.toFixed(0) + '%</div><div class="lbl">Perceived Efficacy</div></div>';
+    html += '</div>';
+    var metaPct = Math.round((avgConf * 50 + (status.success_rate / 100) * 50));
+    var mColor = metaPct >= 60 ? 'var(--green)' : (metaPct >= 30 ? 'var(--yellow)' : 'var(--red)');
+    html += '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:3px">Meta-Cognition Level</div>' +
+      '<div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">' +
+      '<div style="height:100%;width:' + metaPct + '%;background:' + mColor + ';border-radius:3px"></div></div>';
+    document.getElementById('selfPerceptionContent').innerHTML = html;
+  } catch (e) { console.error('Self perception error:', e); }
+}
+
+async function loadPersonality() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const traits = data.traits || {};
+    // Map existing traits to Big 5 (OCEAN)
+    var ocean = {
+      Openness: traits.openness ? (typeof traits.openness === 'object' ? traits.openness.score : traits.openness) : 50,
+      Conscientiousness: traits.discipline ? (typeof traits.discipline === 'object' ? traits.discipline.score : traits.discipline) : 50,
+      Extraversion: traits.assertiveness ? (typeof traits.assertiveness === 'object' ? traits.assertiveness.score : traits.assertiveness) : 50,
+      Agreeableness: traits.adaptability ? (typeof traits.adaptability === 'object' ? traits.adaptability.score : traits.adaptability) : 50,
+      Neuroticism: 100 - (traits.stability ? (typeof traits.stability === 'object' ? traits.stability.score : traits.stability) : 50),
+    };
+    // Derive MBTI from OCEAN
+    var mbti = '';
+    mbti += ocean.Openness >= 50 ? 'N' : 'S';
+    mbti += ocean.Conscientiousness >= 50 ? 'J' : 'P';
+    mbti += ocean.Extraversion >= 50 ? 'E' : 'I';
+    mbti += ocean.Agreeableness >= 50 ? 'F' : 'T';
+    var html = '<div style="margin-bottom:10px;text-align:center">' +
+      '<span style="font-size:1.5rem;font-weight:700;color:var(--accent);letter-spacing:4px">' + mbti + '</span>' +
+      '<span style="font-size:0.7rem;color:var(--text-dim);margin-left:6px">MBTI</span></div>';
+    html += '<div style="margin-bottom:10px">';
+    var oceanLabels = {Openness:'Openness',Conscientiousness:'Conscientiousness',Extraversion:'Extraversion',Agreeableness:'Agreeableness',Neuroticism:'Neuroticism'};
+    for (var t in ocean) {
+      var s = Math.round(ocean[t]);
+      var c = s >= 60 ? 'var(--green)' : (s >= 40 ? 'var(--yellow)' : 'var(--red)');
+      html += '<div style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:1px">' +
+        '<span>' + t + '</span><span style="color:var(--text-dim)">' + s + '%</span></div>' +
+        '<div style="height:5px;background:var(--surface2);border-radius:2px;overflow:hidden">' +
+        '<div style="height:100%;width:' + s + '%;background:' + c + ';border-radius:2px"></div></div></div>';
+    }
+    html += '</div>';
+    // Core traits list
+    html += '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase">Core Traits</div>';
+    var traitEntries = Object.entries(traits);
+    traitEntries.sort(function(a,b) {
+      var sa = typeof a[1] === 'object' ? a[1].score : a[1];
+      var sb = typeof b[1] === 'object' ? b[1].score : b[1];
+      return sb - sa;
+    });
+    html += traitEntries.slice(0,4).map(function(e) {
+      var nm = e[0].replace(/_/g,' ');
+      var sc = typeof e[1] === 'object' ? e[1].score : e[1];
+      return '<span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:0.75rem;margin:2px;background:var(--surface2);border:1px solid var(--border)">' + nm + ' ' + sc.toFixed(0) + '</span>';
+    }).join('');
+    document.getElementById('personalityContent').innerHTML = html;
+  } catch (e) { console.error('Personality error:', e); }
+}
+
+async function loadCharacteristics() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const sc = data.self_concept || {};
+    const beliefs = data.beliefs || {};
+    var chars = [];
+    if (sc.aspirations) chars.push({label:'Aspirational',desc:'Driven by ' + sc.aspirations.length + ' articulated goals'});
+    if (sc.core_beliefs) chars.push({label:'Principle-Driven',desc:'Guided by ' + sc.core_beliefs.length + ' core beliefs'});
+    chars.push({label:'Self-Aware',desc:'Monitors ' + Object.keys(data.traits || {}).length + ' identity dimensions'});
+    chars.push({label:'Resilient',desc:'Survived ' + (data.crisis_count || 0) + ' crisis events'});
+    chars.push({label:'Evolutionary',desc:'Captured ' + (data.snapshot_count || 0) + ' identity snapshots'});
+    chars.push({label:'Value-Aligned',desc:'Reinforces 9 value axioms'});
+    var html = '';
+    for (var i = 0; i < chars.length; i++) {
+      html += '<div style="display:flex;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)">' +
+        '<span style="width:100px;font-weight:500;color:var(--accent);font-size:0.8rem">' + chars[i].label + '</span>' +
+        '<span style="font-size:0.8rem;color:var(--text-dim)">' + chars[i].desc + '</span></div>';
+    }
+    document.getElementById('characteristicsContent').innerHTML = html;
+  } catch (e) { console.error('Characteristics error:', e); }
+}
+
+async function loadSkills() {
+  try {
+    const data = await fetchJSON('/api/self');
+    var layers = data.layer_scores || {};
+    var skillMap = {
+      L1: {name:'Execution',icon:'⚡',desc:'Terminal ops, git, pytest'},
+      L2: {name:'Planning',icon:'📋',desc:'Goal analysis, step planning, codegen'},
+      L3: {name:'Self-Direction',icon:'🧭',desc:'Signal detection, goal gen, prioritization'},
+      L4: {name:'Optimization',icon:'🔧',desc:'Parameter tuning, A/B testing, experimentation'},
+      L5: {name:'Evolution',icon:'🌿',desc:'Pattern detection, strategy evolution'},
+      L6: {name:'Identity',icon:'🪪',desc:'Self-modeling, values, crisis mgmt'},
+    };
+    var html = '';
+    for (var lid in skillMap) {
+      if (!skillMap.hasOwnProperty(lid)) continue;
+      var sm = skillMap[lid];
+      var score = layers[lid] ? (layers[lid].score || 0) : 0;
+      var c = score >= 60 ? 'var(--green)' : (score >= 30 ? 'var(--yellow)' : 'var(--red)');
+      html += '<div style="margin-bottom:7px">' +
+        '<div style="display:flex;justify-content:space-between;font-size:0.8rem">' +
+        '<span>' + sm.icon + ' ' + sm.name + '</span>' +
+        '<span style="color:var(--text-dim);font-size:0.75rem">' + sm.desc + '</span>' +
+        '<span style="color:' + c + '">' + score.toFixed(0) + '</span></div>' +
+        '<div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden">' +
+        '<div style="height:100%;width:' + score + '%;background:' + c + ';border-radius:2px"></div></div></div>';
+    }
+    document.getElementById('skillsContent').innerHTML = html || '<div style="color:var(--text-dim)">No skill data</div>';
+  } catch (e) { console.error('Skills error:', e); }
+}
+
+async function loadRoles() {
+  try {
+    const data = await fetchJSON('/api/self');
+    var layers = data.layer_scores || {};
+    var roleMap = [
+      {name:'Executor',icon:'⚡',domain:'L1-L2',desc:'Executes plans, runs tests, applies patches'},
+      {name:'Strategist',icon:'🎯',domain:'L3-L4',desc:'Generates goals, optimizes parameters'},
+      {name:'Architect',icon:'🏗️',domain:'L5-L6',desc:'Detects patterns, manages identity'},
+      {name:'Meta-Cognitive',icon:'🔄',domain:'L7+',desc:'Reflects on improvement process'},
+      {name:'Guardian',icon:'🛡️',domain:'Cross-layer',desc:'Enforces invariants, monitors crises'},
+      {name:'Chronicler',icon:'📝',domain:'Cross-layer',desc:'Records snapshots, tracks evolution'},
+    ];
+    var topLayer = '';
+    var topScore = -1;
+    for (var lid in layers) {
+      if (layers.hasOwnProperty(lid) && (layers[lid].score || 0) > topScore) {
+        topScore = layers[lid].score;
+        topLayer = lid;
+      }
+    }
+    var html = '';
+    for (var i = 0; i < roleMap.length; i++) {
+      var r = roleMap[i];
+      html += '<div style="display:flex;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">' +
+        '<span style="font-size:1rem;margin-right:8px">' + r.icon + '</span>' +
+        '<div style="flex:1"><div style="font-size:0.8rem;font-weight:500">' + r.name + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--text-dim)">' + r.desc + '</div></div>' +
+        '<span style="font-size:0.7rem;color:var(--text2)">' + r.domain + '</span></div>';
+    }
+    html += '<div style="margin-top:6px;font-size:0.75rem;color:var(--text-dim);text-align:center">Primary: <span style="color:var(--accent)">' + roleMap[Math.min(parseInt(topLayer.replace('L',''))-1, 2)].name + '</span> (strongest layer ' + topLayer + ')</div>';
+    document.getElementById('rolesContent').innerHTML = html;
+  } catch (e) { console.error('Roles error:', e); }
+}
+
+async function loadCoherence() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const values = await fetchJSON('/api/values');
+    const drift = await fetchJSON('/api/values/drift');
+    var traits = data.traits || {};
+    var axioms = values.axioms || {};
+    // Trait-axiom alignment score
+    var traitVals = Object.values(traits).map(function(t) { return typeof t === 'object' ? t.score : t; });
+    var avgTrait = traitVals.reduce(function(a,b) { return a + b; }, 0) / Math.max(traitVals.length, 1);
+    var axiomReinforce = Object.values(axioms).map(function(a) { return a.reinforced_count || 0; });
+    var totalReinf = axiomReinforce.reduce(function(a,b) { return a + b; }, 0);
+    var balance = values.balance_score || 50;
+    var drifting = drift.overall_drifting || false;
+    var coherenceScore = Math.round((avgTrait * 0.3) + (balance * 0.3) + ((100 - (drifting ? 30 : 0)) * 0.2) + (Math.min(100, totalReinf * 5) * 0.2));
+    coherenceScore = Math.min(100, coherenceScore);
+    var c = coherenceScore >= 70 ? 'var(--green)' : (coherenceScore >= 40 ? 'var(--yellow)' : 'var(--red)');
+    var html = '<div style="text-align:center;margin-bottom:10px">' +
+      '<span style="font-size:2rem;font-weight:700;color:' + c + '">' + coherenceScore + '</span>' +
+      '<span style="font-size:0.8rem;color:var(--text-dim);margin-left:4px">/100</span></div>' +
+      '<div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:10px">' +
+      '<div style="height:100%;width:' + coherenceScore + '%;background:' + c + ';border-radius:4px"></div></div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.8rem">';
+    html += '<div><span style="color:var(--text-dim)">Trait Avg:</span> ' + avgTrait.toFixed(0) + '</div>';
+    html += '<div><span style="color:var(--text-dim)">Balance:</span> ' + balance.toFixed(0) + '%</div>';
+    html += '<div><span style="color:var(--text-dim)">Drift:</span> ' + (drifting ? '⚠️ Yes' : '✅ No') + '</div>';
+    html += '<div><span style="color:var(--text-dim)">Reinforcements:</span> ' + totalReinf + '</div>';
+    html += '</div>';
+    document.getElementById('coherenceContent').innerHTML = html;
+  } catch (e) { console.error('Coherence error:', e); }
+}
+
+async function loadSelfNarrative() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const fragments = data.recent_narrative_fragments || [];
+    var html = '';
+    if (fragments.length > 0) {
+      for (var i = Math.max(0, fragments.length - 5); i < fragments.length; i++) {
+        var f = fragments[i];
+        var ts = new Date(f.timestamp * 1000).toISOString().slice(11, 19);
+        var catIcons = {observation:'👁️', milestone:'🏆', reflection:'💭', aspiration:'✨', auto:'🤖'};
+        html += '<div style="padding:5px 0;border-bottom:1px solid var(--border)">' +
+          '<div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-dim);margin-bottom:2px">' +
+          '<span>' + (catIcons[f.category] || '•') + ' ' + (f.source || 'auto') + '</span>' +
+          '<span>' + ts + '</span></div>' +
+          '<div style="font-size:0.8rem;line-height:1.4">' + (f.text || '').slice(0, 120) + '</div></div>';
+      }
+    } else {
+      html = '<div style="color:var(--text-dim)">No narrative history yet</div>';
+    }
+    document.getElementById('selfNarrativeContent').innerHTML = html;
+  } catch (e) { console.error('Self narrative error:', e); }
+}
+
+async function loadPurpose() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const sc = data.self_concept || {};
+    document.getElementById('purposeStatement').textContent = sc.purpose || '(not set)';
+    const values = await fetchJSON('/api/values');
+    var axioms = values.axioms || {};
+    var aligned = Object.keys(axioms).filter(function(a) { return axioms[a].weight >= 1.3 || axioms[a].reinforced_count >= 3; });
+    var alignDiv = document.getElementById('purposeAlignment');
+    if (aligned.length > 0) {
+      alignDiv.innerHTML = aligned.map(function(a) {
+        var w = axioms[a].weight || 1.0;
+        return '<span style="display:inline-block;padding:2px 8px;border-radius:8px;font-size:0.75rem;margin:2px 3px;background:rgba(88,166,255,0.1);border:1px solid rgba(88,166,255,0.3);color:var(--accent)">' + a + ' (' + w.toFixed(1) + ')</span>';
+      }).join('');
+    } else {
+      alignDiv.innerHTML = '<span style="color:var(--text-dim)">Building alignment...</span>';
+    }
+  } catch (e) { console.error('Purpose load error:', e); }
+}
+
+async function loadDescription() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const sc = data.self_concept || {};
+    document.getElementById('descriptionContent').textContent = sc.self_description || '(not set)';
+  } catch (e) { console.error('Description load error:', e); }
+}
+
+async function loadAspirations() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const sc = data.self_concept || {};
+    const aspirations = sc.aspirations || [];
+    const div = document.getElementById('aspirationsList');
+    if (aspirations.length === 0) {
+      div.innerHTML = '(no aspirations set)';
+    } else {
+      var html = '';
+      for (var i = 0; i < aspirations.length; i++) {
+        var pct = Math.min(100, 25 + i * 15);
+        var barColor = pct >= 75 ? 'var(--green)' : (pct >= 40 ? 'var(--yellow)' : 'var(--text-dim)');
+        html += '<div style="margin-bottom:12px">' +
+          '<div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px">' +
+          '<span>' + aspirations[i] + '</span>' +
+          '<span style="color:var(--text-dim)">' + pct + '%</span></div>' +
+          '<div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">' +
+          '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:3px;transition:width 0.5s"></div></div>' +
+          '</div>';
+      }
+      div.innerHTML = html;
+    }
+  } catch (e) { console.error('Aspirations load error:', e); }
+}
+
+async function loadVitalSigns() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const status = await fetchJSON('/api/status');
+    const crisisData = await fetchJSON('/api/crisis');
+    var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    html += '<div class="stat"><div class="num">' + status.snapshot_count + '</div><div class="lbl">Snapshots</div></div>';
+    html += '<div class="stat"><div class="num">' + status.crisis_count + '</div><div class="lbl">Crises</div></div>';
+    html += '<div class="stat"><div class="num">' + status.success_rate.toFixed(0) + '%</div><div class="lbl">Success Rate</div></div>';
+    html += '<div class="stat"><div class="num">' + Object.keys(data.traits || {}).length + '</div><div class="lbl">Traits Tracked</div></div>';
+    html += '</div>';
+    // Stability meter
+    var stability = 0;
+    var layerScores = data.layer_scores || {};
+    var count = 0;
+    for (var k in layerScores) { if (layerScores.hasOwnProperty(k)) { stability += (layerScores[k].score || 0); count++; } }
+    stability = count > 0 ? Math.round(stability / count) : 0;
+    var stableColor = stability >= 60 ? 'var(--green)' : (stability >= 30 ? 'var(--yellow)' : 'var(--red)');
+    html += '<div style="margin-top:10px"><div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px">Avg Layer Health</div>' +
+      '<div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">' +
+      '<div style="height:100%;width:' + stability + '%;background:' + stableColor + ';border-radius:4px"></div></div>' +
+      '<div style="text-align:right;font-size:0.75rem;color:var(--text-dim);margin-top:2px">' + stability + '/100</div></div>';
+    document.getElementById('vitalSignsContent').innerHTML = html;
+  } catch (e) { console.error('Vital signs load error:', e); }
+}
+
+async function loadEvolution() {
+  try {
+    const data = await fetchJSON('/api/self');
+    const fragments = data.recent_narrative_fragments || [];
+    const trends = data.trends || {};
+    var html = '';
+
+    // Recent narrative fragments
+    if (fragments.length > 0) {
+      html += '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Recent Reflections</div>';
+      html += '<div style="margin-bottom:12px">';
+      for (var i = Math.max(0, fragments.length - 3); i < fragments.length; i++) {
+        var f = fragments[i];
+        var catIcons = {observation: '👁️', milestone: '🏆', reflection: '💭', aspiration: '✨'};
+        html += '<div style="padding:4px 0;font-size:0.8rem;color:var(--text-dim)">' +
+          (catIcons[f.category] || '•') + ' ' + (f.text || '').slice(0, 80) + '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Layer trends
+    var trendEntries = Object.entries(trends);
+    if (trendEntries.length > 0) {
+      html += '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Layer Trends</div>';
+      html += '<table style="width:100%;font-size:0.8rem;border-collapse:collapse">';
+      for (var i = 0; i < trendEntries.length; i++) {
+        var lid = trendEntries[i][0], trend = trendEntries[i][1];
+        var icon = trend > 2 ? '↑' : (trend < -2 ? '↓' : '→');
+        var col = trend > 2 ? 'var(--green)' : (trend < -2 ? 'var(--red)' : 'var(--text-dim)');
+        html += '<tr><td style="padding:2px 4px;color:var(--text-dim)">' + lid + '</td>' +
+          '<td style="padding:2px 4px;color:' + col + '">' + icon + '</td>' +
+          '<td style="padding:2px 4px;text-align:right">' + (trend > 0 ? '+' : '') + trend.toFixed(1) + '</td></tr>';
+      }
+      html += '</table>';
+    }
+    document.getElementById('evolutionContent').innerHTML = html || '<div style="color:var(--text-dim)">No evolution data yet</div>';
+  } catch (e) { console.error('Evolution load error:', e); }
+}
+
+async function loadBeliefs() {
+  try {
+    const data = await fetchJSON('/api/self/beliefs');
+    const entries = Object.entries(data);
+    const tagsDiv = document.getElementById('beliefsTags');
+    const listDiv = document.getElementById('beliefsList');
+
+    // Store belief data for detail popups
+    window._allBeliefsData = data;
+
+    // Active beliefs list (clickable)
+    if (entries.length === 0) {
+      listDiv.innerHTML = '(no beliefs recorded)';
+    } else {
+      listDiv.innerHTML = entries
+        .sort((a, b) => b[1].confidence - a[1].confidence)
+        .map(([name, b]) => '<div style="padding:4px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="openBeliefDetail(\'' + name + '\')">' +
+          '<span style="color:var(--accent)">' + name.replace(/_/g, ' ') + '</span> ' +
+          '<span style="color:var(--text-dim)">(' + (b.confidence * 100).toFixed(0) + '% confidence' +
+          (b.category ? ', ' + b.category : '') + ')</span></div>'
+        ).join('');
+    }
+  } catch (e) { console.error('Beliefs load error:', e); }
+}
+
+function openBeliefDetail(key) {
+  var data = window._allBeliefsData || {};
+  var core = window._coreBeliefsData || [];
+  var b;
+  var title;
+  // If key is a number, it's a core belief index
+  if (typeof key === 'number') {
+    var statement = core[key] || '';
+    title = 'Core Belief #' + (key + 1);
+    b = { statement: statement, confidence: 0.9, category: 'core', evidence: [], active: true, created_at: 0, last_updated: 0 };
+  } else {
+    b = data[key];
+    title = key.replace(/_/g, ' ');
+  }
+  if (!b) return;
+
+  var evidenceRows = (b.evidence && b.evidence.length > 0)
+    ? b.evidence.map(function(e) {
+        var ts = new Date(e[0] * 1000).toISOString().slice(0, 19).replace('T', ' ');
+        return '<tr><td style="padding:3px 8px;font-size:0.8rem;color:var(--text-dim)">' + ts + '</td>' +
+               '<td style="padding:3px 8px;font-size:0.8rem">' + (e[1] || '') + '</td>' +
+               '<td style="padding:3px 8px;font-size:0.8rem;color:var(--text2)">' + (e[2] || '') + '</td></tr>';
+      }).join('')
+    : '<tr><td style="padding:8px;color:var(--text-dim);text-align:center" colspan="3">No evidence recorded</td></tr>';
+
+  var html = '';
+
+  // 1. Statement & metadata table
+  html += '<h3 style="font-size:0.9rem;margin-bottom:8px;color:var(--accent)">Statement</h3>';
+  html += '<div style="font-style:italic;margin-bottom:14px;padding:8px;background:var(--bg);border-radius:6px;font-size:0.9rem">' + (b.statement || '—') + '</div>';
+
+  html += '<table style="width:100%;border-collapse:collapse;margin-bottom:14px">';
+  html += '<tr><td style="padding:4px 8px;font-size:0.8rem;color:var(--text-dim);width:100px">Confidence</td><td style="padding:4px 8px;font-size:0.8rem">' + (b.confidence * 100).toFixed(0) + '%</td></tr>';
+  html += '<tr><td style="padding:4px 8px;font-size:0.8rem;color:var(--text-dim)">Category</td><td style="padding:4px 8px;font-size:0.8rem">' + (b.category || '—') + '</td></tr>';
+  html += '<tr><td style="padding:4px 8px;font-size:0.8rem;color:var(--text-dim)">Active</td><td style="padding:4px 8px;font-size:0.8rem">' + (b.active ? '✅' : '❌') + '</td></tr>';
+  if (b.created_at && b.created_at > 0) {
+    var ct = new Date(b.created_at * 1000).toISOString().slice(0, 19).replace('T', ' ');
+    html += '<tr><td style="padding:4px 8px;font-size:0.8rem;color:var(--text-dim)">Created</td><td style="padding:4px 8px;font-size:0.8rem">' + ct + '</td></tr>';
+  }
+  html += '</table>';
+
+  // 2. Evidence table
+  html += '<h3 style="font-size:0.9rem;margin-bottom:8px;color:var(--accent)">Evidence Log (' + (b.evidence ? b.evidence.length : 0) + ')</h3>';
+  html += '<table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:0.8rem">';
+  html += '<thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:4px 8px;text-align:left;color:var(--text-dim)">Time</th><th style="padding:4px 8px;text-align:left;color:var(--text-dim)">Source</th><th style="padding:4px 8px;text-align:left;color:var(--text-dim)">Description</th></tr></thead>';
+  html += '<tbody>' + evidenceRows + '</tbody></table>';
+
+  openModal(title, html);
+}
+
+async function loadCrisis() {
+  try {
+    const check = await fetchJSON('/api/crisis/check');
+    document.getElementById('crisisSeverity').textContent = check.severity || 'none';
+    document.getElementById('violations').textContent = check.violations.length;
+
+    const pred = await fetchJSON('/api/crisis/predict?horizon=5');
+    document.getElementById('riskLevel').textContent = pred.risk_level;
+
+    // Drift info
+    try {
+      const drift = await fetchJSON('/api/values/drift');
+      const di = document.getElementById('driftInfo');
+      if (drift.overall_drifting) {
+        di.innerHTML = `<div class="drift-warning">⚠️ Drift detected (value: ${drift.value_drift.overall_drift}, layer: ${drift.layer_drift.volatile_layers?.length || 0} volatile)</div>`;
+      } else {
+        di.innerHTML = `<div style="color:var(--text-dim);font-size:0.85rem;margin-top:8px;">✅ No drift detected</div>`;
+      }
+    } catch(e) {}
+  } catch (e) { console.error('Crisis load error:', e); }
+}
+
+async function loadTimeline() {
+  try {
+    const tl = await fetchJSON('/api/timeline');
+    const container = document.getElementById('timelineContent');
+    let html = `<div style="margin-bottom:8px;font-size:0.85rem;color:var(--text-dim);">
+      ${tl.snapshot_count} snapshots over ${tl.time_span || 'N/A'} | ${tl.milestones?.length || 0} milestones
+    </div>`;
+
+    // Recent snapshots
+    if (tl.snapshots && tl.snapshots.length > 0) {
+      html += '<div class="timeline-list">';
+      const recent = tl.snapshots.slice(-10).reverse();
+      for (const s of recent) {
+        const t = new Date(s.timestamp * 1000).toISOString().slice(11, 19);
+        const tag = s.tag ? `<span class="tl-tag">${s.tag}</span>` : '';
+        const scores = Object.entries(s.scores || {}).map(([k, v]) => `${k}:${v.toFixed(0)}`).join(' ');
+        html += `<div class="tl-item" style="cursor:pointer" onclick="openSnapshotDetail(${s.id})">
+          <span><span class="tl-time">${t}</span> #${s.id} ${tag}</span>
+          <span class="tl-scores">${scores}</span>
+        </div>`;
+      }
+      html += '</div>';
+    }
+
+    // Milestones
+    if (tl.milestones && tl.milestones.length > 0) {
+      html += '<div style="margin-top:12px;"><h3>🏆 Milestones</h3>';
+      for (const m of tl.milestones.slice(-5)) {
+        const mSid = m.snapshot_id;
+        const t = new Date(m.timestamp * 1000).toISOString().slice(11, 19);
+        html += `<div class="milestone" style="cursor:pointer" onclick="openSnapshotDetail(${m.snapshot_id})">#${m.snapshot_id} @ ${t}: <span class="reason">${m.reasons.join(', ')}</span></div>`;
+      }
+      html += '</div>';
+    }
+
+    container.innerHTML = html;
+  } catch (e) { document.getElementById('timelineContent').textContent = 'Error loading timeline'; }
+}
+
+async function loadAll() {
+  await Promise.all([
+    loadStatus(),
+    loadNarrative(),
+    loadSelfConcept(),
+    loadSelfImage(),
+    loadSelfPerception(),
+    loadPersonality(),
+    loadCharacteristics(),
+    loadSkills(),
+    loadRoles(),
+    loadCoherence(),
+    loadSelfNarrative(),
+    loadPurpose(),
+    loadDescription(),
+    loadAspirations(),
+    loadVitalSigns(),
+    loadEvolution(),
+    loadBeliefs(),
+    loadLayerScores(),
+    loadTraits(),
+    loadValues(),
+    loadCrisis(),
+    loadTimeline(),
+  ]);
+  document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+}
+
+// Auto-refresh
+let autoTimer = null;
+function setupAutoRefresh() {
+  const cb = document.getElementById('autoRefresh');
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  if (cb.checked) {
+    autoTimer = setInterval(loadAll, 10000);
+  }
+}
+document.getElementById('autoRefresh').addEventListener('change', setupAutoRefresh);
+
+// Initial load
+loadAll();
+setupAutoRefresh();
+</script>
+
+<!-- Modal overlay for clickable tooltips -->
+<div id="detailModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(4px)" onclick="closeModal(event)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;max-width:800px;width:90vw;max-height:85vh;overflow-y:auto;padding:24px;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.5)" onclick="event.stopPropagation()">
+    <button style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer" onclick="closeModal()">&times;</button>
+    <div id="modalTitle" style="font-size:1.1rem;font-weight:600;margin-bottom:16px;padding-right:24px"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<script>
+function closeModal(e) {
+  document.getElementById('detailModal').style.display = 'none';
+}
+
+async function openSnapshotDetail(id) {
+  try {
+    const snap = await fetchJSON('/api/snapshots/' + id);
+    if (!snap || !snap.snapshot_id) { openModal('Snapshot #' + id, '<p style="color:var(--text-dim)">Snapshot not found</p>'); return; }
+    var ts = new Date(snap.timestamp * 1000).toISOString().slice(0, 19).replace('T', ' ');
+    var html = '';
+
+    // Metadata bar
+    html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;font-size:0.85rem">';
+    html += '<span><span style="color:var(--text-dim)">Time:</span> ' + ts + '</span>';
+    html += '<span><span style="color:var(--text-dim)">Version:</span> ' + (snap.version || '—') + '</span>';
+    html += '<span><span style="color:var(--text-dim)">Origin:</span> ' + (snap.origin || '—') + '</span>';
+    html += '<span><span style="color:var(--text-dim)">Tag:</span> ' + (snap.tag || '—') + '</span>';
+    if (snap.crisis_active) html += '<span style="color:var(--red)">🚨 Crisis</span>';
+    html += '</div>';
+
+    // 1. Layer scores table
+    html += '<h3 style="font-size:0.9rem;margin-bottom:8px;color:var(--accent)">Layer Scores</h3>';
+    html += '<table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:0.85rem">';
+    html += '<thead><tr style="border-bottom:1px solid var(--border)">' +
+      '<th style="padding:4px 8px;text-align:left;color:var(--text-dim)">Layer</th>' +
+      '<th style="padding:4px 8px;text-align:right;color:var(--text-dim)">Score</th>' +
+      '<th style="padding:4px 8px;text-align:left;color:var(--text-dim)">Bar</th></tr></thead><tbody>';
+    var layerEntries = Object.entries(snap.layer_scores || {});
+    for (var i = 0; i < layerEntries.length; i++) {
+      var lid = layerEntries[i][0], ld = layerEntries[i][1];
+      var sc = ld.score || 0;
+      var col = sc >= 50 ? 'var(--green)' : (sc >= 20 ? 'var(--yellow)' : 'var(--red)');
+      html += '<tr><td style="padding:3px 8px">' + lid + '</td>' +
+        '<td style="padding:3px 8px;text-align:right">' + sc.toFixed(1) + '</td>' +
+        '<td style="padding:3px 8px"><span style="display:inline-block;height:12px;width:' + Math.min(100, sc) + '%;background:' + col + ';border-radius:3px"></span></td></tr>';
+    }
+    html += '</tbody></table>';
+
+    // 2. Value axioms table
+    var axEntries = Object.entries(snap.value_axioms || {});
+    if (axEntries.length > 0) {
+      html += '<h3 style="font-size:0.9rem;margin-bottom:8px;color:var(--accent)">Value Axioms</h3>';
+      html += '<table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:0.85rem">';
+      html += '<thead><tr style="border-bottom:1px solid var(--border)">' +
+        '<th style="padding:4px 8px;text-align:left;color:var(--text-dim)">Axiom</th>' +
+        '<th style="padding:4px 8px;text-align:right;color:var(--text-dim)">Reinforcements</th>' +
+        '<th style="padding:4px 8px;text-align:right;color:var(--text-dim)">Weight</th>' +
+        '<th style="padding:4px 8px;text-align:center;color:var(--text-dim)">Confidence</th></tr></thead><tbody>';
+      for (var i = 0; i < axEntries.length; i++) {
+        var an = axEntries[i][0], as = axEntries[i][1];
+        html += '<tr><td style="padding:3px 8px">' + an + '</td>' +
+          '<td style="padding:3px 8px;text-align:right">' + (as.reinforced_count || '0') + '</td>' +
+          '<td style="padding:3px 8px;text-align:right">' + (as.weight || 1.0).toFixed(1) + '</td>' +
+          '<td style="padding:3px 8px;text-align:center">' + ((as.confidence || 0) * 100).toFixed(0) + '%</td></tr>';
+      }
+      html += '</tbody></table>';
+    }
+
+    // 3. Narrative
+    if (snap.narrative) {
+      html += '<h3 style="font-size:0.9rem;margin-bottom:8px;color:var(--accent)">Narrative</h3>';
+      html += '<div style="font-style:italic;padding:8px;background:var(--bg);border-radius:6px;font-size:0.85rem;margin-bottom:14px">' + snap.narrative + '</div>';
+    }
+
+    // 4. Stats summary + traits mini-chart
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
+
+    // Stats sub-table
+    html += '<div class="subcard"><div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase">Stats</div>';
+    html += '<table style="width:100%;font-size:0.8rem">';
+    html += '<tr><td style="padding:2px 4px;color:var(--text-dim)">Attempts</td><td style="padding:2px 4px;text-align:right">' + (snap.total_attempts || 0) + '</td></tr>';
+    html += '<tr><td style="padding:2px 4px;color:var(--text-dim)">Successes</td><td style="padding:2px 4px;text-align:right">' + (snap.successful_applications || 0) + '</td></tr>';
+    html += '<tr><td style="padding:2px 4px;color:var(--text-dim)">KG Raw</td><td style="padding:2px 4px;text-align:right">' + (snap.kg_nodes_raw || 0) + '</td></tr>';
+    html += '<tr><td style="padding:2px 4px;color:var(--text-dim)">KG Consol.</td><td style="padding:2px 4px;text-align:right">' + (snap.kg_nodes_consolidated || 0) + '</td></tr>';
+    html += '</table></div>';
+
+    // Traits mini-chart
+    var tEntries = Object.entries(snap.traits || {});
+    if (tEntries.length > 0) {
+      html += '<div class="subcard"><div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase">Traits</div>';
+      html += '<table style="width:100%;font-size:0.8rem">';
+      for (var i = 0; i < tEntries.length; i++) {
+        var tn = tEntries[i][0], td = tEntries[i][1];
+        var ts = typeof td === 'object' ? (td.score || 50) : td;
+        html += '<tr><td style="padding:1px 4px;color:var(--text-dim)">' + tn.replace(/_/g, ' ') + '</td>' +
+          '<td style="padding:1px 4px;text-align:right">' + ts.toFixed(0) + '</td></tr>';
+      }
+      html += '</table></div>';
+    }
+    html += '</div>';
+
+    openModal('Snapshot #' + id, html);
+  } catch(e) {
+    openModal('Snapshot #' + id, '<p style="color:var(--red)">Error loading snapshot</p>');
+  }
+}
+
+function openModal(title, html) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('detailModal').style.display = 'flex';
+}
+</script>
+</body>
+</html>
+"""
+
+
+# ── Dashboard App Factory ───────────────────────────────────────
+
+def create_dashboard_app(components: Optional[dict] = None) -> FastAPI:
+    """Create the dashboard FastAPI application.
+
+    The dashboard serves a single-page HTML app and proxies API calls
+    to the same server.
+    """
+    from identity_app.api import create_app
+
+    # Create the underlying API app with the same components
+    api_app = create_app(components)
+
+    app = FastAPI(
+        title="Identity Dashboard",
+        description="Visual dashboard for the Identity App",
+        version="1.0.0",
+    )
+
+    # Mount the API at /api
+    app.mount("/api", api_app)
+
+    # Serve the dashboard at /
+    @app.get("/", response_class=HTMLResponse)
+    @app.get("/dashboard", response_class=HTMLResponse)
+    async def get_dashboard():
+        return DASHBOARD_HTML
+
+    return app
+
+
+# ── Direct Run ──────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    import uvicorn
+    app = create_dashboard_app()
+    uvicorn.run(app, host="127.0.0.1", port=8500, log_level="info")
