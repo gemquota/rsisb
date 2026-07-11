@@ -1,0 +1,14 @@
+{
+  "active": false,
+  "triggered_at": 0.0,
+  "triggered_by": "",
+  "resolved_at": 0.0,
+  "history": [
+    {
+      "triggered_at": 1783743685.6941082,
+      "triggered_by": "L3 score 9.8 below threshold 10",
+      "resolved_at": 1783744452.2622087,
+      "resolution": "L3 Self-Direction loop built out \u2014 signal_watcher, goal_generator, queue_manager deployed. L3 score raised from 9.8 to threshold."
+    }
+  ]
+}

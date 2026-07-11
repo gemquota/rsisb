@@ -1,0 +1,60 @@
+{
+  "rrp_version": "2.1",
+  "session": {
+    "session_id": "default",
+    "use_case": 1,
+    "execution_mode": 1,
+    "max_rounds": 5,
+    "depth": 2,
+    "open_questions_per_round": 3,
+    "mcq_options_per_question": 3,
+    "created_at": 1783744984.9996898
+  },
+  "current_round": 0,
+  "status": "initialized",
+  "ambiguity": {
+    "requirements": 0.5,
+    "data_model": 0.5,
+    "edge_case": 0.5,
+    "determinism": 0.5
+  },
+  "ambiguity_history": [],
+  "constraints": [],
+  "decisions": [],
+  "contradictions": [],
+  "telemetry": {
+    "token_budget": {
+      "per_round_limit": 4000,
+      "session_limit": 32000,
+      "round_usage": [],
+      "saturation_alert": false
+    },
+    "question_quality": {
+      "average": 0.0,
+      "scores": []
+    },
+    "satisfaction": {
+      "cumulative": 0.0,
+      "trend": "\u2192",
+      "deltas": []
+    },
+    "velocity": {
+      "rounds": 0,
+      "avg_duration": 0.0,
+      "total_elapsed": 0.0
+    },
+    "topic_coverage": {
+      "mask": 0,
+      "coverage_percent": 0.0,
+      "covered": []
+    },
+    "ledger_entries": 0
+  },
+  "checkpoints": 0,
+  "agent_personas": [],
+  "current_agent": "default",
+  "summary": "",
+  "round_count": 0,
+  "is_completed": false,
+  "_session_id": "default"
+}

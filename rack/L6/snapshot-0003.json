@@ -1,4 +1,6 @@
 {
+  "snapshot_id": 3,
+  "timestamp": 1783744452.2635317,
   "version": "0.0.9",
   "layer_scores": {
     "L1": {
@@ -53,21 +55,21 @@
       }
     },
     "L6": {
-      "score": 57.5,
+      "score": 92,
       "metrics": {
         "value_definition": 0,
         "value_adherence": 100,
-        "value_reinforcement": 50.0,
-        "identity_stability": 60.0,
+        "value_reinforcement": 0,
+        "identity_stability": 0,
         "self_knowledge": 70
       }
     }
   },
   "value_axioms": {
     "robustness": {
-      "reinforced_count": 1,
-      "last_reinforced": 1783745045.0092862,
-      "total_applications": 1
+      "reinforced_count": 0,
+      "last_reinforced": 0.0,
+      "total_applications": 0
     },
     "coherence": {
       "reinforced_count": 0,
@@ -90,24 +92,24 @@
       "total_applications": 0
     },
     "identity": {
-      "reinforced_count": 1,
-      "last_reinforced": 1783745045.0064814,
-      "total_applications": 1
+      "reinforced_count": 0,
+      "last_reinforced": 0.0,
+      "total_applications": 0
     },
     "learning": {
-      "reinforced_count": 0,
-      "last_reinforced": 0.0,
-      "total_applications": 0
-    },
-    "stability": {
       "reinforced_count": 1,
-      "last_reinforced": 1783745045.0056705,
+      "last_reinforced": 1783744452.2616658,
       "total_applications": 1
     },
-    "growth": {
+    "stability": {
       "reinforced_count": 0,
       "last_reinforced": 0.0,
       "total_applications": 0
+    },
+    "growth": {
+      "reinforced_count": 1,
+      "last_reinforced": 1783744452.261093,
+      "total_applications": 1
     }
   },
   "self_concept": {
@@ -125,12 +127,12 @@
       "Test absolutism guarantees integrity",
       "Self-knowledge drives improvement"
     ],
-    "current_narrative": "RRP protocol engine deployed. Structured refinement with ambiguity tracking, constraint locking, decision capture, and compact state encoding operational.",
-    "last_updated": 1783745044.9999015
+    "current_narrative": "L3 Self-Direction loop operational. Signal coverage, goal generation, and queue management active. L3 score at 57.8.",
+    "last_updated": 1783744452.262416
   },
-  "snapshot_count": 48,
   "total_attempts": 120,
   "successful_applications": 9,
   "kg_nodes_raw": 800,
-  "kg_nodes_consolidated": 7
+  "kg_nodes_consolidated": 7,
+  "narrative": "L3 Self-Direction loop operational. Signal coverage, goal generation, and queue management active. L3 score at 57.8."
 }

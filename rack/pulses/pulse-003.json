@@ -1,0 +1,88 @@
+{
+  "pulse_id": 3,
+  "lifecycle": 1,
+  "phase": "l3_self_direction",
+  "version": "0.0.9",
+  "timestamp": "2026-07-11T04:34:12Z",
+  "system_baseline": {
+    "total_attempts": 121,
+    "successful_applications": 10,
+    "success_rate": 8.3,
+    "snapshot_count": 49,
+    "kg_nodes_raw": 800,
+    "kg_nodes_consolidated": 7,
+    "layer_scores": {
+      "L1": 83,
+      "L2": 29.0,
+      "L3": 57.8,
+      "L4": 27.0,
+      "L5": 40.8,
+      "L6": 92
+    }
+  },
+  "l3_deployment": {
+    "signal_watcher": {
+      "watch_paths": [
+        "."
+      ],
+      "poll_interval_seconds": 30.0,
+      "signals_detected": 48,
+      "signal_coverage_updated_to": 85.0
+    },
+    "goal_generator": {
+      "signal_goals_generated": 10,
+      "state_goals_generated": 18,
+      "total_generated": 56
+    },
+    "queue_manager": {
+      "max_size": 10,
+      "items_queued": 10,
+      "top_priority": {
+        "id": "goal-0021",
+        "priority": 0.95,
+        "desc": "Resolve active identity crisis"
+      }
+    }
+  },
+  "crisis_resolution": {
+    "triggered_by": "L3 score 9.8 below threshold 10",
+    "resolved_via": "L3 module deployment (signal_watcher, goal_generator, queue_manager)",
+    "resolution_result": {
+      "status": "resolved",
+      "resolution": "L3 Self-Direction loop built out \u2014 signal_watcher, goal_generator, queue_manager deployed. L3 score raised from 9.8 to threshold."
+    }
+  },
+  "self_model_updates": {
+    "L3": {
+      "signal_coverage": 85.0,
+      "goal_generation": 70.0,
+      "goal_execution": 30.0,
+      "goal_diversity": 40.0,
+      "queue_health": 60.0,
+      "score": 57.8
+    },
+    "L4": {
+      "kg_utilization": 15.0
+    },
+    "L5": {
+      "kg_growth": 20.0,
+      "pattern_detection": 25.0,
+      "redundancy_detection": 10.0
+    },
+    "value_reinforcements": [
+      "growth",
+      "learning"
+    ]
+  },
+  "new_modules": [
+    "l3_self_direction/signal_watcher.py \u2014 Filesystem polling for file change detection",
+    "l3_self_direction/goal_generator.py \u2014 Signal-to-goal and state-to-goal generation",
+    "l3_self_direction/queue_manager.py \u2014 Priority queue with value-weighted ordering",
+    "tests/test_l3_self_direction.py \u2014 11 passing tests"
+  ],
+  "test_count": 54,
+  "decision": "PASS",
+  "confidence": 0.92,
+  "narrative": "L3 Self-Direction loop operational. Signal coverage, goal generation, and queue management active. L3 score at 57.8.",
+  "summary": "Pulse 003: L3 Self-Direction loop fully deployed. Signal watcher polling detects file changes; goal generator processes signals + system state into ranked goals; queue manager prioritizes execution. Identity crisis resolved (L3 raised from 9.8 to threshold). 11 new tests (54 total). L4/L5 metrics initialized."
+}

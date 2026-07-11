@@ -1,0 +1,111 @@
+{
+  "rrp_version": "2.1",
+  "session": {
+    "session_id": "rrp_demo",
+    "use_case": 4,
+    "execution_mode": 1,
+    "max_rounds": 6,
+    "depth": 3,
+    "open_questions_per_round": 3,
+    "mcq_options_per_question": 3,
+    "created_at": 1783745013.2577958
+  },
+  "current_round": 1,
+  "status": "active",
+  "ambiguity": {
+    "requirements": 0.2,
+    "data_model": 0.3,
+    "edge_case": 0.4,
+    "determinism": 0.1
+  },
+  "ambiguity_history": [
+    {
+      "round": 1,
+      "ambiguity": {
+        "requirements": 0.2,
+        "data_model": 0.3,
+        "edge_case": 0.4,
+        "determinism": 0.1
+      },
+      "timestamp": 1783745013.281276
+    }
+  ],
+  "constraints": [
+    {
+      "key": "use",
+      "value": "postgresql",
+      "locked_round": 1,
+      "source": "user"
+    },
+    {
+      "key": "expose",
+      "value": "no_expose",
+      "locked_round": 1,
+      "source": "user"
+    },
+    {
+      "key": "postgresql",
+      "value": "storage",
+      "locked_round": 1,
+      "source": "user"
+    }
+  ],
+  "decisions": [
+    {
+      "round": 1,
+      "decision_type": "commitment",
+      "description": "PostgreSQL for storage",
+      "reasoning": "ACID compliance + team expertise",
+      "confidence": 0.9,
+      "timestamp": 1783745013.292595,
+      "ambiguity_at_time": {
+        "requirements": 0.2,
+        "data_model": 0.3,
+        "edge_case": 0.4,
+        "determinism": 0.1
+      }
+    }
+  ],
+  "contradictions": [],
+  "telemetry": {
+    "token_budget": {
+      "per_round_limit": 4000,
+      "session_limit": 32000,
+      "round_usage": [],
+      "saturation_alert": false
+    },
+    "question_quality": {
+      "average": 0.0,
+      "scores": []
+    },
+    "satisfaction": {
+      "cumulative": 0.0,
+      "trend": "\u2192",
+      "deltas": []
+    },
+    "velocity": {
+      "rounds": 1,
+      "avg_duration": 1783745013.27,
+      "total_elapsed": 0.0
+    },
+    "topic_coverage": {
+      "mask": 55,
+      "coverage_percent": 62.5,
+      "covered": [
+        "ARCH",
+        "SEC",
+        "DATA",
+        "SCAL",
+        "TEST"
+      ]
+    },
+    "ledger_entries": 0
+  },
+  "checkpoints": 0,
+  "agent_personas": [],
+  "current_agent": "default",
+  "summary": "RRP v2.1 | Session: rrp_demo | Use Case: U4 | Rounds: 1/6 | Ambiguity: req=0.50 dm=0.50 ec=0.50 det=0.50 | Decisions: 0 | Constraints: 3 | Contradictions: 0",
+  "round_count": 1,
+  "is_completed": false,
+  "_session_id": "rrp_demo"
+}

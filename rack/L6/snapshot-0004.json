@@ -1,4 +1,6 @@
 {
+  "snapshot_id": 4,
+  "timestamp": 1783745045.0123687,
   "version": "0.0.9",
   "layer_scores": {
     "L1": {
@@ -128,9 +130,9 @@
     "current_narrative": "RRP protocol engine deployed. Structured refinement with ambiguity tracking, constraint locking, decision capture, and compact state encoding operational.",
     "last_updated": 1783745044.9999015
   },
-  "snapshot_count": 48,
   "total_attempts": 120,
   "successful_applications": 9,
   "kg_nodes_raw": 800,
-  "kg_nodes_consolidated": 7
+  "kg_nodes_consolidated": 7,
+  "narrative": "RRP protocol engine deployed. Structured refinement with ambiguity tracking, constraint locking, decision capture, and compact state encoding operational."
 }

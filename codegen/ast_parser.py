@@ -35,26 +35,45 @@ class StubCoordinate:
         }
 
 
+def _is_docstring_node(node) -> bool:
+    """Check if an AST node is a docstring (Expr containing a string Constant)."""
+    return (
+        isinstance(node, ast.Expr)
+        and isinstance(node.value, (ast.Constant, ast.Str))
+        and isinstance(node.value.value if isinstance(node.value, ast.Constant) else node.value.s, str)
+    )
+
+
 def _is_stub_body(body_node) -> bool:
-    """Check if an AST body consists only of stub expressions."""
+    """Check if an AST body consists only of stub expressions (plus docstrings)."""
     if not body_node:
         return True
     for node in body_node:
+        # Skip docstrings
+        if _is_docstring_node(node):
+            continue
+        # pass
         if isinstance(node, ast.Pass):
+            continue
+        # Ellipsis (...)
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and node.value.value is Ellipsis:
             continue
         if isinstance(node, ast.Expr) and isinstance(node.value, ast.Ellipsis):
             continue
+        # raise NotImplementedError
         if isinstance(node, ast.Raise):
             if isinstance(node.exc, ast.Call) and isinstance(node.exc.func, ast.Name):
                 if node.exc.func.id == "NotImplementedError":
                     continue
             if isinstance(node.exc, ast.Name) and node.exc.id == "NotImplementedError":
                 continue
+        # empty return
         if isinstance(node, ast.Return):
             if node.value is None:
                 continue
             if isinstance(node.value, ast.Constant) and node.value.value is None:
                 continue
+        # Not a stub — has real code
         return False
     return True
 
@@ -101,13 +120,15 @@ def find_stubs(source_path: str) -> list[StubCoordinate]:
 
 
 def _classify_stub_body(body_node) -> str:
-    """Classify the type of stub in a body."""
+    """Classify the type of stub in a body (skipping docstrings)."""
     if not body_node:
         return "empty_body"
     for node in body_node:
+        if _is_docstring_node(node):
+            continue
         if isinstance(node, ast.Pass):
             return "pass"
-        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Ellipsis):
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and node.value.value is Ellipsis:
             return "ellipsis"
         if isinstance(node, ast.Raise):
             return "raise_not_implemented"

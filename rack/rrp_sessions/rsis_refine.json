@@ -1,0 +1,172 @@
+{
+  "rrp_version": "2.1",
+  "session": {
+    "session_id": "rsis_refine",
+    "use_case": 3,
+    "execution_mode": 1,
+    "max_rounds": 8,
+    "depth": 3,
+    "open_questions_per_round": 3,
+    "mcq_options_per_question": 3,
+    "created_at": 1783745045.0006611
+  },
+  "current_round": 1,
+  "status": "active",
+  "ambiguity": {
+    "requirements": 0.15,
+    "data_model": 0.2,
+    "edge_case": 0.25,
+    "determinism": 0.1
+  },
+  "ambiguity_history": [
+    {
+      "round": 1,
+      "ambiguity": {
+        "requirements": 0.15,
+        "data_model": 0.2,
+        "edge_case": 0.25,
+        "determinism": 0.1
+      },
+      "timestamp": 1783745045.0037465
+    }
+  ],
+  "constraints": [
+    {
+      "key": "maintain",
+      "value": "zero-deletion",
+      "locked_round": 1,
+      "source": "user"
+    },
+    {
+      "key": "use",
+      "value": "ast-targeted",
+      "locked_round": 1,
+      "source": "user"
+    },
+    {
+      "key": "reach",
+      "value": "388",
+      "locked_round": 1,
+      "source": "user"
+    },
+    {
+      "key": "use",
+      "value": "the",
+      "locked_round": 1,
+      "source": "user"
+    },
+    {
+      "key": "the",
+      "value": "4",
+      "locked_round": 1,
+      "source": "user"
+    },
+    {
+      "key": "guarantees",
+      "value": "on",
+      "locked_round": 1,
+      "source": "user"
+    },
+    {
+      "key": "must",
+      "value": "use",
+      "locked_round": 1,
+      "source": "user"
+    }
+  ],
+  "decisions": [
+    {
+      "round": 1,
+      "decision_type": "commitment",
+      "description": "Immutable rack/ storage invariant",
+      "reasoning": "Zero-deletion directive from Guardian Protocol \u00a72.1",
+      "confidence": 0.95,
+      "timestamp": 1783745045.003772,
+      "ambiguity_at_time": {
+        "requirements": 0.15,
+        "data_model": 0.2,
+        "edge_case": 0.25,
+        "determinism": 0.1
+      }
+    },
+    {
+      "round": 1,
+      "decision_type": "commitment",
+      "description": "AST-targeted surgical diffs only",
+      "reasoning": "Anti-Bloat Code Generation Standard \u00a72.2",
+      "confidence": 0.9,
+      "timestamp": 1783745045.0037844,
+      "ambiguity_at_time": {
+        "requirements": 0.15,
+        "data_model": 0.2,
+        "edge_case": 0.25,
+        "determinism": 0.1
+      }
+    },
+    {
+      "round": 1,
+      "decision_type": "commitment",
+      "description": "4-phase manual evaluation",
+      "reasoning": "Oracle Protocol \u00a75.1 \u2014 all L2 cycles require evaluation pass",
+      "confidence": 0.85,
+      "timestamp": 1783745045.0037909,
+      "ambiguity_at_time": {
+        "requirements": 0.15,
+        "data_model": 0.2,
+        "edge_case": 0.25,
+        "determinism": 0.1
+      }
+    }
+  ],
+  "contradictions": [
+    {
+      "constraint_a": "use=ast-targeted",
+      "constraint_b": "use=the",
+      "description": "Contradiction detected: use was 'ast-targeted' but new input says 'the'",
+      "resolved": false,
+      "resolution": ""
+    }
+  ],
+  "telemetry": {
+    "token_budget": {
+      "per_round_limit": 4000,
+      "session_limit": 32000,
+      "round_usage": [],
+      "saturation_alert": false
+    },
+    "question_quality": {
+      "average": 0.0,
+      "scores": []
+    },
+    "satisfaction": {
+      "cumulative": 0.9,
+      "trend": "\u2192",
+      "deltas": [
+        0.9
+      ]
+    },
+    "velocity": {
+      "rounds": 1,
+      "avg_duration": 1783745045.0,
+      "total_elapsed": 0.0
+    },
+    "topic_coverage": {
+      "mask": 165,
+      "coverage_percent": 50.0,
+      "covered": [
+        "ARCH",
+        "DATA",
+        "TEST",
+        "UX"
+      ]
+    },
+    "ledger_entries": 0
+  },
+  "checkpoints": 0,
+  "agent_personas": [],
+  "current_agent": "default",
+  "summary": "RRP v2.1 | Session: rsis_refine | Use Case: U3 | Rounds: 1/8 | Ambiguity: req=0.50 dm=0.50 ec=0.50 det=0.50 | Decisions: 0 | Constraints: 7 | Contradictions: 1",
+  "round_count": 1,
+  "is_completed": false,
+  "_session_id": "rsis_refine"
+}

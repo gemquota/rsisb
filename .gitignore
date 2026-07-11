@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.recovery_state.json
+debug_test.py
+/tmp/

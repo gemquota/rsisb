@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSIS Portal — System Telemetry & Control</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--font);
+  min-height: 100vh;
+}
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 240px; background: var(--surface); border-right: 1px solid var(--border);
+  padding: 20px 0; flex-shrink: 0;
+}
+.sidebar h1 {
+  font-size: 14px; font-weight: 600; padding: 0 20px 20px;
+  color: var(--accent); letter-spacing: 0.5px;
+}
+.sidebar .version {
+  font-size: 11px; color: var(--text2); padding: 0 20px 20px; margin-top: -12px;
+}
+.nav-item {
+  padding: 10px 20px; cursor: pointer; font-size: 14px;
+  color: var(--text2); transition: all 0.15s; display: flex; align-items: center; gap: 10px;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--surface2); color: var(--accent); border-left: 3px solid var(--accent); }
+.nav-icon { width: 18px; text-align: center; }
+.main { flex: 1; padding: 24px 32px; overflow-y: auto; max-height: 100vh; }
+.tab { display: none; }
+.tab.active { display: block; }
+h2 { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+h3 { font-size: 15px; font-weight: 500; color: var(--text2); margin-bottom: 12px; }
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 20px; margin-bottom: 16px;
+}
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.stat-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+.stat-label { color: var(--text2); }
+.stat-value { font-weight: 500; }
+.stat-good { color: var(--green); }
+.stat-warn { color: var(--yellow); }
+.stat-bad { color: var(--red); }
+.layer-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px; text-align: center;
+}
+.layer-score { font-size: 32px; font-weight: 700; }
+.layer-name { font-size: 12px; color: var(--text2); margin-top: 4px; }
+.layer-bar {
+  height: 6px; background: var(--surface2); border-radius: 3px; margin-top: 10px; overflow: hidden;
+}
+.layer-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+.pulse-item {
+  padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+  cursor: pointer;
+}
+.pulse-item:last-child { border-bottom: none; }
+.pulse-item:hover { color: var(--accent); }
+.btn {
+  background: var(--surface2); color: var(--text); border: 1px solid var(--border);
+  padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;
+  transition: all 0.15s;
+}
+.btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: #4090f0; }
+.btn-danger { background: var(--red); color: #fff; border-color: var(--red); }
+input, textarea, select {
+  background: var(--surface2); color: var(--text); border: 1px solid var(--border);
+  padding: 8px 12px; border-radius: 6px; font-size: 14px; width: 100%;
+  margin-bottom: 12px; font-family: var(--font);
+}
+textarea { min-height: 80px; resize: vertical; }
+.chat-box {
+  height: 400px; overflow-y: auto; background: var(--surface2); border-radius: 8px;
+  padding: 16px; margin-bottom: 12px; font-size: 14px;
+}
+.chat-msg { margin-bottom: 12px; }
+.chat-user { color: var(--accent); font-weight: 500; }
+.chat-system { color: var(--green); font-weight: 500; }
+.chat-you { color: var(--purple); font-weight: 500; }
+.chat-text { margin-top: 2px; color: var(--text); line-height: 1.5; }
+.chart-container { height: 250px; margin-top: 10px; }
+.snapshot-item { font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.axiom-tag {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 12px; margin: 2px; background: var(--surface2); border: 1px solid var(--border);
+}
+@media (max-width: 768px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 12px 0; }
+  .nav-item { padding: 8px 16px; font-size: 13px; }
+  .main { padding: 16px; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <h1>◈ RSIS Portal</h1>
+    <div class="version" id="sidebarVersion">v0.0.9</div>
+    <div class="nav-item active" data-tab="dashboard"><span class="nav-icon">◈</span> Dashboard</div>
+    <div class="nav-item" data-tab="telemetry"><span class="nav-icon">▦</span> Telemetry</div>
+    <div class="nav-item" data-tab="chat"><span class="nav-icon">💬</span> Chat</div>
+    <div class="nav-item" data-tab="controls"><span class="nav-icon">⚙</span> Controls</div>
+    <div class="nav-item" data-tab="identity"><span class="nav-icon">◎</span> Identity</div>
+  </nav>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="tab active" id="tab-dashboard">
+      <h2>System Dashboard</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>System Status</h3>
+          <div id="dashStatus"></div>
+        </div>
+        <div class="card">
+          <h3>Success Metrics</h3>
+          <div id="dashMetrics"></div>
+        </div>
+      </div>
+      <h3>Layer Scores</h3>
+      <div class="card-grid" id="layerGrid"></div>
+      <h3>Layer Score Timeline</h3>
+      <div class="card"><div class="chart-container"><canvas id="timelineChart"></canvas></div></div>
+    </div>
+
+    <!-- TELEMETRY -->
+    <div class="tab" id="tab-telemetry">
+      <h2>Telemetry Browser</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Pulse Logs</h3>
+          <div id="pulseList"></div>
+        </div>
+        <div class="card">
+          <h3>Pulse Detail</h3>
+          <div id="pulseDetail"><p style="color:var(--text2)">Select a pulse to view details.</p></div>
+        </div>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Knowledge Graph</h3>
+          <div id="kgStats"></div>
+        </div>
+        <div class="card">
+          <h3>Recent Transitions</h3>
+          <div id="transitionsList"><p style="color:var(--text2)">Tracked in state machine logs.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="tab" id="tab-chat">
+      <h2>System Chat</h2>
+      <div class="card">
+        <div class="chat-box" id="chatBox">
+          <div class="chat-msg">
+            <span class="chat-system">System:</span>
+            <div class="chat-text">Hello. I am RSIS, an autonomous recursive self-improving system. How may I assist you today?</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="chatInput" placeholder="Type a message..." style="margin-bottom:0" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="btn btn-primary" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="tab" id="tab-controls">
+      <h2>System Controls</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Identity Controls</h3>
+          <label>Update Narrative</label>
+          <textarea id="narrativeInput" placeholder="Describe current system focus...">Bootstrapping from architectural scaffold into operational runtime</textarea>
+          <button class="btn btn-primary" onclick="updateNarrative()">Update Narrative</button>
+          <div style="margin-top:12px">
+            <button class="btn" onclick="takeSnapshot()">📸 Take Identity Snapshot</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Value Axiom Controls</h3>
+          <label>Reinforce Axiom</label>
+          <div style="display:flex;gap:8px">
+            <select id="axiomSelect" style="margin-bottom:0;flex:1">
+              <option value="robustness">Robustness</option>
+              <option value="coherence">Coherence</option>
+              <option value="efficiency">Efficiency</option>
+              <option value="maintainability">Maintainability</option>
+              <option value="autonomy">Autonomy</option>
+              <option value="identity">Identity</option>
+              <option value="learning">Learning</option>
+              <option value="stability">Stability</option>
+              <option value="growth">Growth</option>
+            </select>
+            <button class="btn" onclick="reinforceAxiom()">+1 Reinforce</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Crisis Management</h3>
+          <div id="crisisStatus"></div>
+          <div style="margin-top:8px">
+            <button class="btn btn-danger" onclick="resolveCrisis()">Resolve Crisis</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>System Actions</h3>
+          <button class="btn" onclick="refreshAll()">🔄 Refresh All Data</button>
+          <div style="margin-top:8px">
+            <button class="btn" onclick="updateSelfModel()">Recalculate Scores</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDENTITY -->
+    <div class="tab" id="tab-identity">
+      <h2>Identity Viewer</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Self-Concept</h3>
+          <div id="selfConceptDisplay"></div>
+        </div>
+        <div class="card">
+          <h3>Core Beliefs & Aspirations</h3>
+          <div id="beliefsDisplay"></div>
+        </div>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Value Axioms</h3>
+          <div id="axiomDisplay"></div>
+        </div>
+        <div class="card">
+          <h3>Snapshots</h3>
+          <div id="snapshotList"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const API = '';
+
+// === Navigation ===
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('tab-' + item.dataset.tab).classList.add('active');
+    if (item.dataset.tab === 'dashboard') loadDashboard();
+    if (item.dataset.tab === 'telemetry') loadTelemetry();
+    if (item.dataset.tab === 'identity') loadIdentity();
+    if (item.dataset.tab === 'controls') loadControls();
+  });
+});
+
+// === API helpers ===
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, {
+    headers: { 'Content-Type': 'application/json', ...opts.headers },
+    ...opts
+  });
+  return res.json();
+}
+
+// === Dashboard ===
+let timelineChart = null;
+
+async function loadDashboard() {
+  const status = await api('/api/status');
+  const concept = await api('/api/self-model/concept');
+  const health = await api('/api/health');
+  const layers = await api('/api/layers');
+  const timeline = await api('/api/metrics/timeline');
+
+  document.getElementById('sidebarVersion').textContent = 'v' + status.version;
+
+  // Status card
+  document.getElementById('dashStatus').innerHTML = `
+    <div class="stat-row"><span class="stat-label">Version</span><span class="stat-value">${status.version}</span></div>
+    <div class="stat-row"><span class="stat-label">Narrative</span><span class="stat-value" style="font-size:12px">${concept.current_narrative || '—'}</span></div>
+    <div class="stat-row"><span class="stat-label">KG Nodes</span><span class="stat-value">${status.kg_nodes_raw} raw / ${status.kg_nodes_consolidated} consolidated</span></div>
+    <div class="stat-row"><span class="stat-label">Snapshots</span><span class="stat-value">${status.snapshot_count}</span></div>
+  `;
+
+  // Metrics card
+  const srColor = status.success_rate > 10 ? 'var(--green)' : status.success_rate > 5 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('dashMetrics').innerHTML = `
+    <div class="stat-row"><span class="stat-label">Total Attempts</span><span class="stat-value">${status.total_attempts}</span></div>
+    <div class="stat-row"><span class="stat-label">Successful</span><span class="stat-value stat-good">${status.successful_applications}</span></div>
+    <div class="stat-row"><span class="stat-label">Success Rate</span><span class="stat-value" style="color:${srColor}">${status.success_rate}%</span></div>
+    <div class="stat-row"><span class="stat-label">Health</span><span class="stat-value ${health.healthy ? 'stat-good' : 'stat-bad'}">${health.healthy ? '✓ OK' : '⚠ CRISIS'}</span></div>
+  `;
+
+  // Layer cards
+  const layerGrid = document.getElementById('layerGrid');
+  layerGrid.innerHTML = '';
+  const lnames = {L1:'Execution',L2:'Planning',L3:'Self-Direction',L4:'Optimizer',L5:'Evolution',L6:'Identity'};
+  Object.entries(layers.layers).forEach(([lid, data]) => {
+    const score = data.score;
+    const color = score >= 60 ? 'var(--green)' : score >= 30 ? 'var(--yellow)' : 'var(--red)';
+    const card = document.createElement('div');
+    card.className = 'layer-card';
+    card.innerHTML = `
+      <div class="layer-score" style="color:${color}">${Math.round(score)}</div>
+      <div class="layer-name">${lid}: ${lnames[lid] || lid}</div>
+      <div class="layer-bar"><div class="layer-fill" style="width:${score}%;background:${color}"></div></div>
+    `;
+    layerGrid.appendChild(card);
+  });
+
+  // Timeline chart
+  const ctx = document.getElementById('timelineChart').getContext('2d');
+  if (timelineChart) timelineChart.destroy();
+  if (timeline.timeline && timeline.timeline.length > 0) {
+    const labels = timeline.timeline.map(t => 'S#' + t.snapshot_id);
+    const datasets = [];
+    ['L1','L2','L3','L4','L5','L6'].forEach((lid, i) => {
+      const colors = ['#3fb950','#58a6ff','#d29922','#bc8cff','#f85149','#79c0ff'];
+      datasets.push({
+        label: lid, data: timeline.timeline.map(t => t[lid] || 0),
+        borderColor: colors[i], backgroundColor: colors[i] + '22',
+        fill: true, tension: 0.3, pointRadius: 3
+      });
+    });
+    timelineChart = new Chart(ctx, {
+      type: 'line', data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#8b949e' } } },
+        scales: {
+          x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+          y: { min: 0, max: 100, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+        }
+      }
+    });
+  } else {
+    ctx.canvas.parentElement.innerHTML = '<p style="color:var(--text2);padding:40px;text-align:center">No timeline data yet. Take snapshots from the Controls tab.</p>';
+  }
+}
+
+// === Telemetry ===
+async function loadTelemetry() {
+  const pulses = await api('/api/pulses?limit=20');
+  const kg = await api('/api/knowledge-graph');
+
+  const list = document.getElementById('pulseList');
+  list.innerHTML = pulses.pulses.length === 0
+    ? '<p style="color:var(--text2)">No pulse logs found.</p>'
+    : pulses.pulses.map(p => `
+      <div class="pulse-item" onclick="showPulse(${p.pulse_id})">
+        <strong>Pulse ${p.pulse_id}</strong>
+        <span style="color:var(--text2);margin-left:12px">${p.phase || '—'}</span>
+        <span style="float:right">${p.decision || '—'} · ${p.timestamp ? new Date(p.timestamp).toLocaleDateString() : ''}</span>
+      </div>
+    `).join('');
+
+  document.getElementById('kgStats').innerHTML = `
+    <div class="stat-row"><span class="stat-label">Raw Nodes</span><span class="stat-value">${kg.total_nodes_raw || 0}</span></div>
+    <div class="stat-row"><span class="stat-label">Consolidated</span><span class="stat-value">${kg.total_nodes_consolidated || 0}</span></div>
+    <div class="stat-row"><span class="stat-label">Utility Density</span><span class="stat-value">${kg.utility_density || 0}%</span></div>
+  `;
+}
+
+async function showPulse(id) {
+  const pulse = await api('/api/pulses/' + id);
+  const detail = document.getElementById('pulseDetail');
+  detail.innerHTML = `<pre style="font-size:12px;overflow-x:auto;color:var(--text2);max-height:400px">${JSON.stringify(pulse, null, 2)}</pre>`;
+}
+
+// === Chat ===
+const chatContext = [];
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const box = document.getElementById('chatBox');
+  box.innerHTML += `<div class="chat-msg"><span class="chat-you">You:</span><div class="chat-text">${escapeHtml(msg)}</div></div>`;
+  box.scrollTop = box.scrollHeight;
+
+  chatContext.push({ role: 'user', content: msg });
+
+  // Simulate system response based on known patterns
+  const status = await api('/api/status');
+  const concept = await api('/api/self-model/concept');
+  const lower = msg.toLowerCase();
+
+  let reply = '';
+  if (lower.includes('hello') || lower.includes('hi ') || lower === 'hi') {
+    reply = `Hello! I am RSIS v${status.version}. My current purpose is: "${concept.purpose}". How can I help?`;
+  } else if (lower.includes('purpose') || lower.includes('why exist')) {
+    reply = `My purpose is: "${concept.purpose}". I aim to recursively improve my own architecture through structured self-reflection.`;
+  } else if (lower.includes('score') || lower.includes('layer') || lower.includes('l1') || lower.includes('l2') || lower.includes('l3') || lower.includes('l4') || lower.includes('l5') || lower.includes('l6')) {
+    const ls = status.layer_scores;
+    const lines = Object.entries(ls).map(([k,v]) => `${k}: ${Math.round(v.score)}/100`).join(', ');
+    reply = `Current layer scores: ${lines}.`;
+  } else if (lower.includes('narrative') || lower.includes('story')) {
+    reply = `My current narrative: "${concept.current_narrative}".`;
+  } else if (lower.includes('aspiration') || lower.includes('goal')) {
+    const asp = concept.aspirations.map(a => `• ${a}`).join('\n');
+    reply = `My aspirations:\n${asp}`;
+  } else if (lower.includes('belief') || lower.includes('value')) {
+    const beliefs = concept.core_beliefs.map(b => `• ${b}`).join('\n');
+    reply = `My core beliefs:\n${beliefs}`;
+  } else if (lower.includes('health') || lower.includes('crisis')) {
+    const health = await api('/api/health');
+    reply = health.healthy
+      ? 'All health checks passing. No active crises.'
+      : `⚠ Crisis detected! Violations: ${health.violations.join('; ')}`;
+  } else if (lower.includes('help')) {
+    reply = 'I can respond to queries about: scores, layers, purpose, narrative, aspirations, beliefs, health, and identity. Try asking about any of these!';
+  } else if (lower.includes('thank')) {
+    reply = 'You\'re welcome. Self-improvement is a collaborative journey.';
+  } else if (lower.includes('snapshot')) {
+    const snap = await api('/api/snapshots/take', { method: 'POST' });
+    reply = `Identity snapshot #${snap.snapshot_id} taken at ${new Date(snap.timestamp * 1000).toLocaleString()}.`;
+  } else {
+    reply = `I processed your message but don't have a specific response pattern for "${msg.slice(0,50)}". Try asking about my purpose, layers, scores, narrative, or beliefs.`;
+  }
+
+  chatContext.push({ role: 'assistant', content: reply });
+  box.innerHTML += `<div class="chat-msg"><span class="chat-system">RSIS:</span><div class="chat-text" style="white-space:pre-wrap">${escapeHtml(reply)}</div></div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+// === Controls ===
+async function updateNarrative() {
+  const narrative = document.getElementById('narrativeInput').value.trim();
+  if (!narrative) return;
+  await api('/api/self-model/narrative', {
+    method: 'POST',
+    body: JSON.stringify({ narrative }),
+    headers: { 'Content-Type': 'application/json' }
+  });
+  alert('Narrative updated.');
+}
+
+async function takeSnapshot() {
+  const snap = await api('/api/snapshots/take', { method: 'POST' });
+  document.getElementById('snapshotList').innerHTML =
+    `<p style="color:var(--green)">Snapshot #${snap.snapshot_id} taken successfully.</p>`;
+}
+
+async function reinforceAxiom() {
+  const axiom = document.getElementById('axiomSelect').value;
+  const res = await api('/api/value-axioms/reinforce?axiom_name=' + axiom + '&count=1', { method: 'POST' });
+  alert(`Reinforced ${axiom}. Count: ${res.state.reinforced_count}`);
+}
+
+async function resolveCrisis() {
+  const res = await api('/api/crisis/resolve?resolution=Manual+resolution', { method: 'POST' });
+  alert('Crisis resolved: ' + res.status);
+}
+
+async function loadControls() {
+  const health = await api('/api/health');
+  const crisisDiv = document.getElementById('crisisStatus');
+  crisisDiv.innerHTML = health.crisis_active
+    ? `<p style="color:var(--red)">⚠ Active crisis: ${health.violations.join('; ')}</p>`
+    : '<p style="color:var(--green)">✓ No active crisis</p>';
+}
+
+// === Identity ===
+async function loadIdentity() {
+  const sm = await api('/api/self-model');
+  const axioms = await api('/api/value-axioms');
+  const snaps = await api('/api/snapshots');
+
+  // Self-concept
+  const sc = sm.self_concept || {};
+  document.getElementById('selfConceptDisplay').innerHTML = `
+    <div class="stat-row"><span class="stat-label">Purpose</span></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px">${sc.purpose || '—'}</p>
+    <div class="stat-row"><span class="stat-label">Self-Description</span></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px">${sc.self_description || '—'}</p>
+    <div class="stat-row"><span class="stat-label">Current Narrative</span></div>
+    <p style="font-size:13px;color:var(--text2)">${sc.current_narrative || '—'}</p>
+  `;
+
+  // Beliefs
+  const beliefs = sc.core_beliefs || [];
+  const aspirations = sc.aspirations || [];
+  document.getElementById('beliefsDisplay').innerHTML = `
+    <div style="margin-bottom:12px">
+      <strong style="font-size:13px">Core Beliefs</strong>
+      ${beliefs.map(b => `<div class="axiom-tag">${b}</div>`).join('') || '<p style="color:var(--text2);font-size:13px">None defined.</p>'}
+    </div>
+    <div>
+      <strong style="font-size:13px">Aspirations</strong>
+      ${aspirations.map(a => `<div style="font-size:13px;padding:4px 0;color:var(--text2)">→ ${a}</div>`).join('') || '<p style="color:var(--text2);font-size:13px">None defined.</p>'}
+    </div>
+  `;
+
+  // Value axioms
+  document.getElementById('axiomDisplay').innerHTML = Object.entries(axioms.axioms || {})
+    .map(([name, state]) => `
+      <div class="stat-row">
+        <span class="stat-label">${name}</span>
+        <span class="stat-value">×${state.reinforced_count} (weight: ${(axioms.weights[name] || 1.0).toFixed(1)})</span>
+      </div>
+    `).join('') || '<p style="color:var(--text2)">No axiom data.</p>';
+
+  // Snapshots
+  document.getElementById('snapshotList').innerHTML = (snaps.snapshots || []).length === 0
+    ? '<p style="color:var(--text2)">No snapshots yet. Take one from Controls.</p>'
+    : snaps.snapshots.slice().reverse().slice(0, 20).map(s => `
+      <div class="snapshot-item">
+        <strong>#${s.snapshot_id}</strong>
+        <span style="color:var(--text2);margin-left:8px">${new Date(s.timestamp * 1000).toLocaleString()}</span>
+        <span style="color:var(--text2);margin-left:8px">${s.version}</span>
+      </div>
+    `).join('');
+}
+
+// === Refresh ===
+async function refreshAll() {
+  loadDashboard();
+  loadTelemetry();
+  loadIdentity();
+  loadControls();
+}
+
+// === Utilities ===
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// === Initial load ===
+loadDashboard();
+</script>
+</body>
+</html>
