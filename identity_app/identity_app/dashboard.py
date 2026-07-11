@@ -313,6 +313,14 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   body.global-cols-3 .supercard-grid { grid-template-columns: repeat(3, 1fr) !important; }
   body.global-cols-4 .supercard-grid { grid-template-columns: repeat(4, 1fr) !important; }
   .global-col-picker button.active { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(88,166,255,0.1); }
+
+  /* ── Zone column classes ── */
+  .zone-cols-1 { grid-template-columns: 1fr !important; }
+  .zone-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+  .zone-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+  .zone-cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
+  .zone-cols-5 { grid-template-columns: repeat(5, 1fr) !important; }
+  .zone-cols-6 { grid-template-columns: repeat(6, 1fr) !important; }
 </style>
 </head>
 <body>
@@ -331,7 +339,17 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
     <input type="checkbox" id="autoRefresh" checked>
     <label for="autoRefresh">Auto-refresh (10s)</label>
   </div>
-  <button onclick="loadAll()">⟳ Refresh Now</button>
+  <button onclick="loadAll()">⟳ Refresh Now</button><span id="tierColPicker" style="margin-left:12px;font-size:0.8rem;color:var(--text-dim);display:inline-flex;align-items:center;gap:4px">
+  <span id="tierLabel" style="color:var(--text-dim)">Tap a card or supercard</span>
+  <span id="colButtons" style="display:none">
+    <button onclick="applyActiveCol(1)" data-col="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">1</button>
+    <button onclick="applyActiveCol(2)" data-col="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:3px;color:var(--accent);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">2</button>
+    <button onclick="applyActiveCol(3)" data-col="3" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">3</button>
+    <button onclick="applyActiveCol(4)" data-col="4" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">4</button>
+    <button onclick="applyActiveCol(5)" data-col="5" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">5</button>
+    <button onclick="applyActiveCol(6)" data-col="6" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">6</button>
+  </span>
+</span>
   <span id="lastUpdated">—</span><span class="global-col-picker" style="margin-left:12px;font-size:0.8rem;color:var(--text-dim);display:inline-flex;align-items:center;gap:4px">
   Columns:
   <button onclick="setGlobalColumns(1)" data-gcols="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">1</button>
@@ -348,7 +366,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="self-model">
   <div class="supercard-header">
     <h2>🧬 Self Model <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count">4 cards</span><span class="col-picker">Col: <button onclick="setColumns('self-model',1)" data-cols="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">1</button><button onclick="setColumns('self-model',2)" data-cols="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:3px;color:var(--accent);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">2</button><button onclick="setColumns('self-model',3)" data-cols="3" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">3</button><button onclick="setColumns('self-model',4)" data-cols="4" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">4</button><button onclick="setColumns('self-model',5)" data-cols="5" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">5</button><button onclick="setColumns('self-model',6)" data-cols="6" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">6</button></span>
+    <span class="sc-count">4 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Self-Concept -->
@@ -420,7 +438,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="personality-profile">
   <div class="supercard-header">
     <h2>🧠 Personality Profile <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count">3 cards</span><span class="col-picker">Col: <button onclick="setColumns('personality-profile',1)" data-cols="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">1</button><button onclick="setColumns('personality-profile',2)" data-cols="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:3px;color:var(--accent);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">2</button><button onclick="setColumns('personality-profile',3)" data-cols="3" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">3</button><button onclick="setColumns('personality-profile',4)" data-cols="4" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">4</button><button onclick="setColumns('personality-profile',5)" data-cols="5" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">5</button><button onclick="setColumns('personality-profile',6)" data-cols="6" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">6</button></span>
+    <span class="sc-count">3 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Personality -->
@@ -474,7 +492,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="capabilities">
   <div class="supercard-header">
     <h2>⚡ Capabilities <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count">2 cards</span><span class="col-picker">Col: <button onclick="setColumns('capabilities',1)" data-cols="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">1</button><button onclick="setColumns('capabilities',2)" data-cols="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:3px;color:var(--accent);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">2</button><button onclick="setColumns('capabilities',3)" data-cols="3" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">3</button><button onclick="setColumns('capabilities',4)" data-cols="4" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">4</button><button onclick="setColumns('capabilities',5)" data-cols="5" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">5</button><button onclick="setColumns('capabilities',6)" data-cols="6" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">6</button></span>
+    <span class="sc-count">2 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Skills -->
@@ -516,7 +534,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="belief-system">
   <div class="supercard-header">
     <h2>🧭 Belief System <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count">3 cards</span><span class="col-picker">Col: <button onclick="setColumns('belief-system',1)" data-cols="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">1</button><button onclick="setColumns('belief-system',2)" data-cols="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:3px;color:var(--accent);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">2</button><button onclick="setColumns('belief-system',3)" data-cols="3" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">3</button><button onclick="setColumns('belief-system',4)" data-cols="4" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">4</button><button onclick="setColumns('belief-system',5)" data-cols="5" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">5</button><button onclick="setColumns('belief-system',6)" data-cols="6" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">6</button></span>
+    <span class="sc-count">3 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Beliefs -->
@@ -573,7 +591,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="direction-growth">
   <div class="supercard-header">
     <h2>🎯 Direction & Growth <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count">2 cards</span><span class="col-picker">Col: <button onclick="setColumns('direction-growth',1)" data-cols="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">1</button><button onclick="setColumns('direction-growth',2)" data-cols="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:3px;color:var(--accent);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">2</button><button onclick="setColumns('direction-growth',3)" data-cols="3" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">3</button><button onclick="setColumns('direction-growth',4)" data-cols="4" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">4</button><button onclick="setColumns('direction-growth',5)" data-cols="5" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">5</button><button onclick="setColumns('direction-growth',6)" data-cols="6" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">6</button></span>
+    <span class="sc-count">2 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Purpose -->
@@ -630,7 +648,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="narrative-arc">
   <div class="supercard-header">
     <h2>📖 Narrative Arc <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count">3 cards</span><span class="col-picker">Col: <button onclick="setColumns('narrative-arc',1)" data-cols="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">1</button><button onclick="setColumns('narrative-arc',2)" data-cols="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:3px;color:var(--accent);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">2</button><button onclick="setColumns('narrative-arc',3)" data-cols="3" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">3</button><button onclick="setColumns('narrative-arc',4)" data-cols="4" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">4</button><button onclick="setColumns('narrative-arc',5)" data-cols="5" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">5</button><button onclick="setColumns('narrative-arc',6)" data-cols="6" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">6</button></span>
+    <span class="sc-count">3 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Current Narrative -->
@@ -684,7 +702,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <div class="supercard" data-supercard-id="system-health">
   <div class="supercard-header">
     <h2>📊 System Health <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
-    <span class="sc-count">4 cards</span><span class="col-picker">Col: <button onclick="setColumns('system-health',1)" data-cols="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">1</button><button onclick="setColumns('system-health',2)" data-cols="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:3px;color:var(--accent);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">2</button><button onclick="setColumns('system-health',3)" data-cols="3" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">3</button><button onclick="setColumns('system-health',4)" data-cols="4" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">4</button><button onclick="setColumns('system-health',5)" data-cols="5" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">5</button><button onclick="setColumns('system-health',6)" data-cols="6" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 4px;font-size:0.65rem;line-height:1.3">6</button></span>
+    <span class="sc-count">4 cards</span>
   </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Vital Signs -->
@@ -1447,6 +1465,14 @@ document.addEventListener('dragleave', function(e) {
   if (card) card.classList.remove('drag-over');
 });
 
+// Also handle card clicks for active tier
+document.addEventListener('click', function(e) {
+  var card = e.target.closest('.card[data-card-id]');
+  if (!card) return;
+  if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.edit-btn') || e.target.closest('.card-footer')) return;
+  var level = card.dataset.level || 'card';
+  setActiveTier(card.dataset.cardId, level);
+});
 document.addEventListener('drop', function(e) {
   e.preventDefault();
   document.querySelectorAll('.drag-over-zone').forEach(function(z) { z.classList.remove('drag-over-zone'); });
@@ -2159,6 +2185,93 @@ window.applyLayout = function(layout) {
   var layout = getLayout();
   if (layout && layout.globalColumns) {
     setGlobalColumns(layout.globalColumns);
+  }
+})();
+
+// ── Active Tier Column Control ──
+var _activeTierId = null;
+var _activeTierType = null;
+
+function initTierSelection() {
+  // Click on supercard header area
+  document.querySelectorAll('.supercard[data-supercard-id]').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.edit-btn') || e.target.closest('.supercard-footer')) return;
+      setActiveTier(el.dataset.supercardId, 'supercard');
+    });
+  });
+}
+
+function setActiveTier(id, type) {
+  document.querySelectorAll('.active-tier-highlight').forEach(function(el) {
+    el.classList.remove('active-tier-highlight');
+    el.style.outline = '';
+  });
+  _activeTierId = id;
+  _activeTierType = type;
+  var el = type === 'supercard'
+    ? document.querySelector('.supercard[data-supercard-id="' + id + '"]')
+    : document.querySelector('.card[data-card-id="' + id + '"]');
+  if (el) {
+    el.classList.add('active-tier-highlight');
+    el.style.outline = '2px solid var(--accent)';
+    el.style.outlineOffset = '2px';
+  }
+  var label = document.getElementById('tierLabel');
+  var btns = document.getElementById('colButtons');
+  if (label) {
+    var typeNames = { supercard: 'Supercard', card: 'Card', subcard: 'Subcard', partcard: 'Partcard', microcard: 'Microcard' };
+    var h2, name = '';
+    if (type === 'supercard' && el) {
+      h2 = el.querySelector('.supercard-header h2');
+    } else if (el) {
+      h2 = el.querySelector('h2');
+    }
+    if (h2) name = h2.textContent.replace(/\\u270e/g,'').trim();
+    label.textContent = (typeNames[type] || type) + ': ' + (name || id).slice(0, 35);
+  }
+  if (btns) btns.style.display = 'inline-flex';
+  restoreActiveCol();
+}
+
+function restoreActiveCol() {
+  if (!_activeTierId) return;
+  var layout = getLayout();
+  var n = (layout && layout.zoneCols && layout.zoneCols[_activeTierId]) || 2;
+  document.querySelectorAll('#colButtons button').forEach(function(b) {
+    b.classList.toggle('active', parseInt(b.dataset.col) === n);
+  });
+}
+
+function applyActiveCol(n) {
+  if (!_activeTierId) return;
+  document.querySelectorAll('#colButtons button').forEach(function(b) {
+    b.classList.toggle('active', parseInt(b.dataset.col) === n);
+  });
+  var zone = _activeTierType === 'supercard'
+    ? document.querySelector('.supercard[data-supercard-id="' + _activeTierId + '"] .drop-zone')
+    : document.querySelector('.card[data-card-id="' + _activeTierId + '"] .drop-subcard-zone');
+  if (!zone) return;
+  for (var ci = 1; ci <= 6; ci++) zone.classList.remove('zone-cols-' + ci);
+  if (n > 1) zone.classList.add('zone-cols-' + n);
+  var layout = getLayout();
+  if (layout) {
+    if (!layout.zoneCols) layout.zoneCols = {};
+    layout.zoneCols[_activeTierId] = n;
+    saveLayoutObj(layout);
+  }
+}
+
+// Init on page load
+(function() {
+  if (window.loadAll) {
+    var orig = window.loadAll;
+    window.loadAll = async function() {
+      if (orig) await orig();
+      setTimeout(function() {
+        initTierSelection();
+      }, 300);
+    };
   }
 })();
 </script>
