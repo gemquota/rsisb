@@ -306,6 +306,13 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
     border-color: var(--accent); background: rgba(88,166,255,0.05);
     min-height: 40px;
   }
+
+  /* ── Global Columns ── */
+  body.global-cols-1 .supercard-grid { grid-template-columns: 1fr !important; }
+  body.global-cols-2 .supercard-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  body.global-cols-3 .supercard-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  body.global-cols-4 .supercard-grid { grid-template-columns: repeat(4, 1fr) !important; }
+  .global-col-picker button.active { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(88,166,255,0.1); }
 </style>
 </head>
 <body>
@@ -325,7 +332,13 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
     <label for="autoRefresh">Auto-refresh (10s)</label>
   </div>
   <button onclick="loadAll()">⟳ Refresh Now</button>
-  <span id="lastUpdated">—</span>
+  <span id="lastUpdated">—</span><span class="global-col-picker" style="margin-left:12px;font-size:0.8rem;color:var(--text-dim);display:inline-flex;align-items:center;gap:4px">
+  Columns:
+  <button onclick="setGlobalColumns(1)" data-gcols="1" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">1</button>
+  <button onclick="setGlobalColumns(2)" data-gcols="2" class="active" style="background:none;border:1px solid var(--accent);border-radius:3px;color:var(--accent);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">2</button>
+  <button onclick="setGlobalColumns(3)" data-gcols="3" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">3</button>
+  <button onclick="setGlobalColumns(4)" data-gcols="4" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;padding:1px 5px;font-size:0.7rem;min-width:20px">4</button>
+</span>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -336,7 +349,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>🧬 Self Model <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">4 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('self-model',1)" data-cols="1">1</button><button onclick="setColumns('self-model',2)" data-cols="2" class="active">2</button><button onclick="setColumns('self-model',3)" data-cols="3">3</button><button onclick="setColumns('self-model',4)" data-cols="4">4</button><button onclick="setColumns('self-model',5)" data-cols="5">5</button><button onclick="setColumns('self-model',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Self-Concept -->
     <div class="card" data-card-id="self-concept" draggable="true">
@@ -408,7 +421,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>🧠 Personality Profile <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">3 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('personality-profile',1)" data-cols="1">1</button><button onclick="setColumns('personality-profile',2)" data-cols="2" class="active">2</button><button onclick="setColumns('personality-profile',3)" data-cols="3">3</button><button onclick="setColumns('personality-profile',4)" data-cols="4">4</button><button onclick="setColumns('personality-profile',5)" data-cols="5">5</button><button onclick="setColumns('personality-profile',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Personality -->
     <div class="card" data-card-id="personality" draggable="true">
@@ -462,7 +475,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>⚡ Capabilities <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">2 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('capabilities',1)" data-cols="1">1</button><button onclick="setColumns('capabilities',2)" data-cols="2" class="active">2</button><button onclick="setColumns('capabilities',3)" data-cols="3">3</button><button onclick="setColumns('capabilities',4)" data-cols="4">4</button><button onclick="setColumns('capabilities',5)" data-cols="5">5</button><button onclick="setColumns('capabilities',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Skills -->
     <div class="card" data-card-id="skills" draggable="true">
@@ -504,7 +517,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>🧭 Belief System <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">3 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('belief-system',1)" data-cols="1">1</button><button onclick="setColumns('belief-system',2)" data-cols="2" class="active">2</button><button onclick="setColumns('belief-system',3)" data-cols="3">3</button><button onclick="setColumns('belief-system',4)" data-cols="4">4</button><button onclick="setColumns('belief-system',5)" data-cols="5">5</button><button onclick="setColumns('belief-system',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Beliefs -->
     <div class="card" data-card-id="beliefs" draggable="true">
@@ -561,7 +574,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>🎯 Direction & Growth <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">2 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('direction-growth',1)" data-cols="1">1</button><button onclick="setColumns('direction-growth',2)" data-cols="2" class="active">2</button><button onclick="setColumns('direction-growth',3)" data-cols="3">3</button><button onclick="setColumns('direction-growth',4)" data-cols="4">4</button><button onclick="setColumns('direction-growth',5)" data-cols="5">5</button><button onclick="setColumns('direction-growth',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Purpose -->
     <div class="card" data-card-id="purpose" draggable="true">
@@ -618,7 +631,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>📖 Narrative Arc <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">3 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('narrative-arc',1)" data-cols="1">1</button><button onclick="setColumns('narrative-arc',2)" data-cols="2" class="active">2</button><button onclick="setColumns('narrative-arc',3)" data-cols="3">3</button><button onclick="setColumns('narrative-arc',4)" data-cols="4">4</button><button onclick="setColumns('narrative-arc',5)" data-cols="5">5</button><button onclick="setColumns('narrative-arc',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Current Narrative -->
     <div class="card" data-card-id="current-narrative" draggable="true">
@@ -672,7 +685,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   <div class="supercard-header">
     <h2>📊 System Health <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
     <span class="sc-count">4 cards</span>
-  </div><span class="col-picker">Col: <button onclick="setColumns('system-health',1)" data-cols="1">1</button><button onclick="setColumns('system-health',2)" data-cols="2" class="active">2</button><button onclick="setColumns('system-health',3)" data-cols="3">3</button><button onclick="setColumns('system-health',4)" data-cols="4">4</button><button onclick="setColumns('system-health',5)" data-cols="5">5</button><button onclick="setColumns('system-health',6)" data-cols="6">6</button></span>
+  </div>
   <div class="supercard-grid drop-zone" data-drop-zone="true">
     <!-- Vital Signs -->
     <div class="card" data-card-id="vital-signs" draggable="true">
@@ -1349,13 +1362,7 @@ async function loadTimeline() {
         const t = new Date(m.timestamp * 1000).toISOString().slice(11, 19);
         html += `<div class="milestone" style="cursor:pointer" onclick="openSnapshotDetail(${m.snapshot_id})">#${m.snapshot_id} @ ${t}: <span class="reason">${m.reasons.join(', ')}</span></div>`;
       }
-      html += '
-<!-- Create Supercard -->
-<div class="create-supercard-bar">
-  <button onclick="createSupercard()">➕ Create Supercard</button>
-</div>
-
-</div>';
+    html += '</div>';
     }
 
     container.innerHTML = html;
@@ -2112,6 +2119,48 @@ document.addEventListener('drop', function(e) {
     updateLayoutStatus('moved');
   }
 });
+
+// ── Global Columns ──
+function setGlobalColumns(n) {
+  document.body.className = document.body.className.replace(/global-cols-\d+/g, '').trim();
+  if (n > 1) document.body.classList.add('global-cols-' + n);
+  // Update button states
+  document.querySelectorAll('.global-col-picker button').forEach(function(b) {
+    b.classList.toggle('active', parseInt(b.dataset.gcols) === n);
+  });
+  // Save
+  var layout = getLayout();
+  if (layout) { layout.globalColumns = n; saveLayoutObj(layout); }
+}
+
+// ── Extend getDefaultLayout to capture global columns ──
+var __origGetDefault = window.getDefaultLayout || function(){};
+window.getDefaultLayout = function() {
+  var layout = __origGetDefault ? __origGetDefault() : { supercards: [], cardNames: {}, supercardNames: {}, cardContent: {}, cardSizes: {}, cardLevels: {}, cardParents: {} };
+  // Get current global columns from body class
+  for (var c = 1; c <= 4; c++) {
+    if (document.body.classList.contains('global-cols-' + c)) {
+      layout.globalColumns = c;
+      break;
+    }
+  }
+  return layout;
+};
+
+// ── Apply global columns on layout load ──
+var __origApply = window.applyLayout || function(){};
+window.applyLayout = function(layout) {
+  if (__origApply) __origApply(layout);
+  if (layout && layout.globalColumns) setGlobalColumns(layout.globalColumns);
+};
+
+// ── Init global columns on page load ──
+(function() {
+  var layout = getLayout();
+  if (layout && layout.globalColumns) {
+    setGlobalColumns(layout.globalColumns);
+  }
+})();
 </script>
 
 
