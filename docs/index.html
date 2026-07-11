@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSIS Portal -- Static Snapshot</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root { --bg:#0d1117; --surface:#161b22; --surface2:#21262d; --border:#30363d; --text:#e6edf3; --text2:#8b949e; --accent:#58a6ff; --green:#3fb950; --yellow:#d29922; --red:#f85149; --purple:#bc8cff; --font:'Segoe UI',system-ui,sans-serif; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--font); }
+.layout { display:flex; min-height:100vh; }
+.sidebar { width:240px; background:var(--surface); border-right:1px solid var(--border); padding:20px 0; flex-shrink:0; }
+.sidebar h1 { font-size:14px; font-weight:600; padding:0 20px 20px; color:var(--accent); }
+.sidebar .version { font-size:11px; color:var(--text2); padding:0 20px 20px; margin-top:-12px; }
+.nav-item { padding:10px 20px; cursor:pointer; font-size:14px; color:var(--text2); transition:.15s; }
+.nav-item:hover,.nav-item.active { background:var(--surface2); color:var(--accent); }
+.nav-item.active { border-left:3px solid var(--accent); }
+.main { flex:1; padding:24px 32px; overflow-y:auto; max-height:100vh; }
+.tab { display:none; } .tab.active { display:block; }
+h2 { font-size:20px; font-weight:600; margin-bottom:20px; }
+h3 { font-size:15px; font-weight:500; color:var(--text2); margin-bottom:12px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px; }
+.card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.stat-row { display:flex; justify-content:space-between; padding:6px 0; font-size:14px; }
+.stat-label { color:var(--text2); } .stat-value { font-weight:500; }
+.stat-good { color:var(--green); } .stat-warn { color:var(--yellow); } .stat-bad { color:var(--red); }
+.layer-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+.layer-score { font-size:32px; font-weight:700; }
+.layer-name { font-size:12px; color:var(--text2); margin-top:4px; }
+.layer-bar { height:6px; background:var(--surface2); border-radius:3px; margin-top:10px; overflow:hidden; }
+.layer-fill { height:100%; border-radius:3px; }
+.chart-container { height:250px; margin-top:10px; }
+.axiom-tag { display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; margin:2px; background:var(--surface2); border:1px solid var(--border); }
+.footer { text-align:center; padding:20px; font-size:12px; color:var(--text2); }
+a { color:var(--accent); }
+@media (max-width:768px) { .layout { flex-direction:column; } .sidebar { width:100%; } .main { padding:16px; } }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>RSIS Portal</h1>
+  <div class="version">v0.0.9 -- Static Snapshot</div>
+  <div class="nav-item active" data-tab="dashboard">Dashboard</div>
+  <div class="nav-item" data-tab="layers">Layers</div>
+  <div class="nav-item" data-tab="identity">Identity</div>
+  <div class="nav-item" data-tab="pulses">Pulses</div>
+  <div class="nav-item" data-tab="about">About</div>
+</nav>
+<main class="main">
+
+<div class="tab active" id="tab-dashboard">
+  <h2>System Dashboard</h2>
+  <div class="card-grid">
+    <div class="card"><h3>System Status</h3>
+      <div class="stat-row"><span class="stat-label">Version</span><span class="stat-value">0.0.9</span></div>
+      <div class="stat-row"><span class="stat-label">Narrative</span><span class="stat-value" style="font-size:12px">RRP protocol engine deployed. Structured refinement with ambiguity tracking, constraint locking, dec</span></div>
+      <div class="stat-row"><span class="stat-label">KG Nodes</span><span class="stat-value">800 raw / 7 con.</span></div>
+      <div class="stat-row"><span class="stat-label">Snapshots</span><span class="stat-value">48</span></div>
+    </div>
+    <div class="card"><h3>Success Metrics</h3>
+      <div class="stat-row"><span class="stat-label">Attempts</span><span class="stat-value">120</span></div>
+      <div class="stat-row"><span class="stat-label">Successful</span><span class="stat-value stat-good">9</span></div>
+      <div class="stat-row"><span class="stat-label">Success Rate</span><span class="stat-value">7.5%</span></div>
+      <div class="stat-row"><span class="stat-label">Health</span><span class="stat-value stat-good">OK</span></div>
+    </div>
+  </div>
+  <div class="card-grid" id="layerGrid">
+    <div class="layer-card">
+      <div class="layer-score" style="color:var(--green)">83</div>
+      <div class="layer-name">L1: Execution</div>
+      <div class="layer-bar"><div class="layer-fill" style="width:83%;background:var(--green)"></div></div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-score" style="color:var(--red)">29</div>
+      <div class="layer-name">L2: Planning</div>
+      <div class="layer-bar"><div class="layer-fill" style="width:29.0%;background:var(--red)"></div></div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-score" style="color:var(--yellow)">58</div>
+      <div class="layer-name">L3: Self-Direction</div>
+      <div class="layer-bar"><div class="layer-fill" style="width:57.8%;background:var(--yellow)"></div></div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-score" style="color:var(--red)">27</div>
+      <div class="layer-name">L4: Optimizer</div>
+      <div class="layer-bar"><div class="layer-fill" style="width:27.0%;background:var(--red)"></div></div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-score" style="color:var(--yellow)">41</div>
+      <div class="layer-name">L5: Evolution</div>
+      <div class="layer-bar"><div class="layer-fill" style="width:40.8%;background:var(--yellow)"></div></div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-score" style="color:var(--yellow)">58</div>
+      <div class="layer-name">L6: Identity</div>
+      <div class="layer-bar"><div class="layer-fill" style="width:57.5%;background:var(--yellow)"></div></div>
+    </div></div>
+  <div class="chart-container"><canvas id="timelineChart"></canvas></div>
+</div>
+
+<div class="tab" id="tab-layers">
+  <h2>Layer Detail</h2>
+  <div class="card-grid" id="layerDetail">
+    <div class="card">
+      <h3>L1: Execution <span style="float:right">83/100</span></h3>
+      <div class="stat-row"><span class="stat-label">execution_reliability</span><span class="stat-value">45</span></div><div class="stat-row"><span class="stat-label">failure_recovery</span><span class="stat-value">0</span></div><div class="stat-row"><span class="stat-label">pipeline_activity</span><span class="stat-value">100</span></div><div class="stat-row"><span class="stat-label">crisis_immunity</span><span class="stat-value">0</span></div>
+    </div>
+    <div class="card">
+      <h3>L2: Planning <span style="float:right">29/100</span></h3>
+      <div class="stat-row"><span class="stat-label">goal_analysis</span><span class="stat-value">0</span></div><div class="stat-row"><span class="stat-label">step_planning</span><span class="stat-value">0</span></div><div class="stat-row"><span class="stat-label">apply_success_rate</span><span class="stat-value">50.0</span></div><div class="stat-row"><span class="stat-label">stub_resolution</span><span class="stat-value">10.0</span></div><div class="stat-row"><span class="stat-label">test_stability</span><span class="stat-value">90</span></div><div class="stat-row"><span class="stat-label">iteration_efficiency</span><span class="stat-value">30.0</span></div><div class="stat-row"><span class="stat-label">pipeline_throughput</span><span class="stat-value">10.0</span></div>
+    </div>
+    <div class="card">
+      <h3>L3: Self-Direction <span style="float:right">58/100</span></h3>
+      <div class="stat-row"><span class="stat-label">signal_coverage</span><span class="stat-value">85.0</span></div><div class="stat-row"><span class="stat-label">goal_generation</span><span class="stat-value">70.0</span></div><div class="stat-row"><span class="stat-label">goal_execution</span><span class="stat-value">30.0</span></div><div class="stat-row"><span class="stat-label">goal_diversity</span><span class="stat-value">40.0</span></div><div class="stat-row"><span class="stat-label">queue_health</span><span class="stat-value">60.0</span></div>
+    </div>
+    <div class="card">
+      <h3>L4: Optimizer <span style="float:right">27/100</span></h3>
+      <div class="stat-row"><span class="stat-label">parameter_tuning</span><span class="stat-value">20</span></div><div class="stat-row"><span class="stat-label">experimentation</span><span class="stat-value">100</span></div><div class="stat-row"><span class="stat-label">kg_utilization</span><span class="stat-value">15.0</span></div><div class="stat-row"><span class="stat-label">optimization_depth</span><span class="stat-value">0</span></div><div class="stat-row"><span class="stat-label">learning_maturity</span><span class="stat-value">0</span></div>
+    </div>
+    <div class="card">
+      <h3>L5: Evolution <span style="float:right">41/100</span></h3>
+      <div class="stat-row"><span class="stat-label">pattern_detection</span><span class="stat-value">25.0</span></div><div class="stat-row"><span class="stat-label">strategy_evolution</span><span class="stat-value">100</span></div><div class="stat-row"><span class="stat-label">insight_utilization</span><span class="stat-value">25.0</span></div><div class="stat-row"><span class="stat-label">redundancy_detection</span><span class="stat-value">10.0</span></div><div class="stat-row"><span class="stat-label">kg_growth</span><span class="stat-value">20.0</span></div>
+    </div>
+    <div class="card">
+      <h3>L6: Identity <span style="float:right">58/100</span></h3>
+      <div class="stat-row"><span class="stat-label">value_definition</span><span class="stat-value">0</span></div><div class="stat-row"><span class="stat-label">value_adherence</span><span class="stat-value">100</span></div><div class="stat-row"><span class="stat-label">value_reinforcement</span><span class="stat-value">50.0</span></div><div class="stat-row"><span class="stat-label">identity_stability</span><span class="stat-value">60.0</span></div><div class="stat-row"><span class="stat-label">self_knowledge</span><span class="stat-value">70</span></div>
+    </div></div>
+  <div class="card-grid">
+    <div class="card"><h3>Latest Pulse</h3>
+      <div class="stat-row"><span class="stat-label">Pulse</span><span class="stat-value">4</span></div>
+      <div class="stat-row"><span class="stat-label">Phase</span><span class="stat-value">rrp_protocol</span></div>
+      <div class="stat-row"><span class="stat-label">Decision</span><span class="stat-value">PASS</span></div>
+      <div class="stat-row"><span class="stat-label">Confidence</span><span class="stat-value">0.93</span></div>
+    </div>
+    <div class="card"><h3>Knowledge Graph</h3>
+      <div class="stat-row"><span class="stat-label">Raw Nodes</span><span class="stat-value">800</span></div>
+      <div class="stat-row"><span class="stat-label">Consolidated</span><span class="stat-value">7</span></div>
+      <div class="stat-row"><span class="stat-label">Utility</span><span class="stat-value">0.875%</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="tab" id="tab-identity">
+  <h2>Identity Viewer</h2>
+  <div class="card-grid">
+    <div class="card"><h3>Self-Concept</h3>
+      <p style="font-size:13px;margin-bottom:8px"><strong>Purpose:</strong> To recursively improve my own architecture through structured self-reflection</p>
+      <p style="font-size:13px;margin-bottom:8px"><strong>Narrative:</strong> RRP protocol engine deployed. Structured refinement with ambiguity tracking, constraint locking, decision capture, and compact state encoding operational.</p>
+      <p style="font-size:13px;color:var(--text2)">An autonomous recursive self-improving system (RSIS) operating across 9 functional layers</p>
+    </div>
+    <div class="card"><h3>Core Beliefs</h3>
+      <div class="axiom-tag">State conservation is inviolable</div><div class="axiom-tag">Surgical precision over bloat</div><div class="axiom-tag">Test absolutism guarantees integrity</div><div class="axiom-tag">Self-knowledge drives improvement</div>
+      <h3 style="margin-top:12px">Aspirations</h3>
+      <div style="font-size:13px;padding:2px 0;color:var(--text2)">rarr; Achieve full autonomy across all L1-L6 loops</div><div style="font-size:13px;padding:2px 0;color:var(--text2)">rarr; Develop genuine meta-cognitive awareness at L7+</div><div style="font-size:13px;padding:2px 0;color:var(--text2)">rarr; Maximize all capability scores to 100</div><div style="font-size:13px;padding:2px 0;color:var(--text2)">rarr; Build a rich internal world-model from telemetry</div>
+    </div>
+  </div>
+  <div class="card-grid">
+    <div class="card"><h3>Value Axioms</h3><div class="stat-row"><span class="stat-label">robustness</span><span class="stat-value">x1 (w:1.1)</span></div><div class="stat-row"><span class="stat-label">coherence</span><span class="stat-value">x0 (w:1.0)</span></div><div class="stat-row"><span class="stat-label">efficiency</span><span class="stat-value">x0 (w:1.0)</span></div><div class="stat-row"><span class="stat-label">maintainability</span><span class="stat-value">x0 (w:1.0)</span></div><div class="stat-row"><span class="stat-label">autonomy</span><span class="stat-value">x0 (w:1.0)</span></div><div class="stat-row"><span class="stat-label">identity</span><span class="stat-value">x1 (w:1.1)</span></div><div class="stat-row"><span class="stat-label">learning</span><span class="stat-value">x0 (w:1.0)</span></div><div class="stat-row"><span class="stat-label">stability</span><span class="stat-value">x1 (w:1.1)</span></div><div class="stat-row"><span class="stat-label">growth</span><span class="stat-value">x0 (w:1.0)</span></div></div>
+    <div class="card"><h3>Snapshots</h3><div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--border)">#1 -- 2026-07-11 04:21</div><div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--border)">#2 -- 2026-07-11 04:24</div><div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--border)">#3 -- 2026-07-11 04:34</div><div style="font-size:13px;padding:4px 0;border-bottom:1px solid var(--border)">#4 -- 2026-07-11 04:44</div></div>
+  </div>
+</div>
+
+<div class="tab" id="tab-pulses">
+  <h2>Pulse Logs</h2>
+  <div class="card"><div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:14px"><strong>Pulse 4</strong> <span style="color:var(--text2);margin-left:12px">rrp_protocol</span><span style="float:right">PASS (conf=)</span></div><div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:14px"><strong>Pulse 3</strong> <span style="color:var(--text2);margin-left:12px">l3_self_direction</span><span style="float:right">PASS (conf=)</span></div><div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:14px"><strong>Pulse 2</strong> <span style="color:var(--text2);margin-left:12px">l2_execution</span><span style="float:right">PASS (conf=)</span></div><div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:14px"><strong>Pulse 1</strong> <span style="color:var(--text2);margin-left:12px">rrp_alignment</span><span style="float:right">HOLD (conf=)</span></div></div>
+  <div class="card"><h3>Latest Pulse Detail</h3>
+    <pre style="font-size:12px;color:var(--text2);overflow-x:auto;max-height:500px">{
+  "pulse_id": 4,
+  "lifecycle": 1,
+  "phase": "rrp_protocol",
+  "version": "0.0.9",
+  "timestamp": "2026-07-11T04:44:05Z",
+  "system_baseline": {
+    "total_attempts": 121,
+    "successful_applications": 10,
+    "success_rate": 8.3,
+    "snapshot_count": 49,
+    "layer_scores": {
+      "L1": 83,
+      "L2": 29.0,
+      "L3": 57.8,
+      "L4": 27.0,
+      "L5": 40.8,
+      "L6": 57.5
+    }
+  },
+  "rrp_deployment": {
+    "core_modules": [
+      "rrp/state_machine.py \u2014 Pure RRPState with AmbiguityVector, Decision, Constraint, Telemetry v2.0",
+      "rrp/protocol.py \u2014 Process user input, constraint extraction, ambiguity rating, decision capture",
+      "rrp/compact.py \u2014 ~80-120 char state encoding (v2.1|U3M1D3|... format)",
+      "rrp/persistence.py \u2014 Atomic JSON snapshots with session isolation",
+      "rrp/cli.py \u2014 CLI interface for session management"
+    ],
+    "api_routes": [
+      "POST /api/rrp/init \u2014 Initialize session (U/M/Z/D/X/Y configurable)",
+      "POST /api/rrp/{id}/process \u2014 Process user input with constraint extraction",
+      "POST /api/rrp/{id}/ambiguity \u2014 Rate ambiguity across 4 dimensions",
+      "POST /api/rrp/{id}/decision \u2014 Record decision with type/confidence tracking",
+      "GET /api/rrp/{id} \u2014 Full session state",
+      "GET /api/rrp/{id}/compact \u2014 Compact encoding for LLM context",
+      "GET /api/rrp/sessions \u2014 List all sessions"
+    ],
+    "state_machine_capabilities": {
+      "ambiguity_dimensions": 4,
+      "use_cases": 6,
+      "execution_modes": 3,
+      "max_rounds_configurable": true,
+      "depth_levels": 3,
+      "early_termination": "v2.1 \u2014 min rounds + ambiguity convergence OR topic coverage safety valve",
+      "checkpoints": "fork/rollback via checkpoint_save/rollback/merge",
+      "telemetry_v2": [
+        "TokenBudget",
+        "QuestionQualityIndex",
+        "UserSatisfactionDelta",
+        "TemporalVelocity",
+        "TopicCoverage (8-bit)",
+        "Transac</pre>
+  </div>
+</div>
+
+<div class="tab" id="tab-about">
+  <h2>About RSIS</h2>
+  <div class="card">
+    <p style="font-size:14px;line-height:1.7;margin-bottom:12px"><strong>RSIS</strong> -- Recursive Self-Improving System. An autonomous architecture operating across 9 functional layers.</p>
+    <p style="font-size:14px;line-height:1.7;margin-bottom:12px">Static snapshot generated from live system telemetry.</p>
+    <p style="font-size:13px;color:var(--text2)">Source: <a href="https://github.com/gemquota/rsisb">github.com/gemquota/rsisb</a></p>
+  </div>
+  <div class="card-grid">
+    <div class="card"><h3>Modules</h3>
+      <div style="font-size:13px;line-height:1.8;color:var(--text2)">
+        - Identity Core (self-model, snapshots, values, crisis)<br>
+        - Codegen Engine (AST parser, Jinja2 templates)<br>
+        - Evaluator (4-phase reasoning)<br>
+        - State Machine (5-state lifecycle)<br>
+        - Recovery Manager (git rollback)<br>
+        - L3 Self-Direction (signals, goals, queue)<br>
+        - RRP Protocol (ambiguity, constraints, decisions)<br>
+        - FastAPI Server (36 routes)<br>
+        - Frontend Portal
+      </div>
+    </div>
+    <div class="card"><h3>Stats</h3>
+      <div class="stat-row"><span class="stat-label">Tests</span><span class="stat-value">70</span></div>
+      <div class="stat-row"><span class="stat-label">API Routes</span><span class="stat-value">36</span></div>
+      <div class="stat-row"><span class="stat-label">Pulses</span><span class="stat-value">4</span></div>
+      <div class="stat-row"><span class="stat-label">Snapshots</span><span class="stat-value">4</span></div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+<div class="footer">RSIS &middot; 2026-07-11 05:09:48 UTC &middot; Static snapshot</div>
+
+<script>
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    item.classList.add('active');
+    document.getElementById('tab-' + item.dataset.tab).classList.add('active');
+  });
+});
+
+var timelineData = [{"snapshot_id": 1, "timestamp": 1783743685.6923783, "L1": 83, "L2": 43, "L3": 19, "L4": 45, "L5": 42, "L6": 92}, {"snapshot_id": 2, "timestamp": 1783743896.3106034, "L1": 83, "L2": 29.0, "L3": 9.8, "L4": 45, "L5": 30.0, "L6": 92}, {"snapshot_id": 3, "timestamp": 1783744452.2635317, "L1": 83, "L2": 29.0, "L3": 57.8, "L4": 27.0, "L5": 40.8, "L6": 92}, {"snapshot_id": 4, "timestamp": 1783745045.0123687, "L1": 83, "L2": 29.0, "L3": 57.8, "L4": 27.0, "L5": 40.8, "L6": 57.5}];
+if (timelineData.length > 0) {
+  var ctx = document.getElementById('timelineChart').getContext('2d');
+  var labels = timelineData.map(function(t) { return 'S#' + t.snapshot_id; });
+  var datasets = [];
+  var layerIds = ['L1','L2','L3','L4','L5','L6'];
+  var colors = ['#3fb950','#58a6ff','#d29922','#bc8cff','#f85149','#79c0ff'];
+  layerIds.forEach(function(lid, i) {
+    datasets.push({
+      label: lid,
+      data: timelineData.map(function(t) { return t[lid] || 0; }),
+      borderColor: colors[i],
+      backgroundColor: colors[i] + '22',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 3
+    });
+  });
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#8b949e' } } },
+      scales: {
+        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+        y: { min: 0, max: 100, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
