@@ -1,0 +1,18 @@
+{
+  "active": true,
+  "severity": "catastrophic",
+  "triggered_at": 1783770336.808772,
+  "triggered_by": "L1 score 0.0 below threshold 30; L2 score 0.0 below threshold 20; L3 score 0.0 below threshold 10",
+  "resolved_at": 0.0,
+  "history": [],
+  "prediction": {},
+  "violations_at_trigger": [
+    "L1 score 0.0 below threshold 30",
+    "L2 score 0.0 below threshold 20",
+    "L3 score 0.0 below threshold 10",
+    "L4 score 0.0 below threshold 15",
+    "L5 score 0.0 below threshold 15",
+    "L6 score 0.0 below threshold 40"
+  ],
+  "warnings_at_trigger": []
+}

@@ -173,41 +173,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 12px;
   }
-
-  /* ── Drag-and-Drop ── */
-  .card {
-    transition: transform 0.15s, box-shadow 0.15s;
-    cursor: grab;
-  }
-  .card.dragging { opacity: 0.4; transform: scale(0.97); }
-  .card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
-  .drop-zone.drag-over-zone {
-    outline: 2px dashed var(--accent); outline-offset: 4px;
-    border-radius: 8px; min-height: 60px;
-    background: rgba(88, 166, 255, 0.05);
-  }
-  .card .edit-btn, .supercard-header .edit-btn {
-    display: none; float: right; background: none; border: none;
-    color: var(--text-dim); cursor: pointer; font-size: 0.7rem;
-    padding: 0 4px; line-height: 1;
-  }
-  .card:hover .edit-btn, .supercard-header:hover .edit-btn { display: inline-block; }
-  .card .edit-btn:hover, .supercard-header .edit-btn:hover { color: var(--accent); }
-  .supercard-header .edit-btn { font-size: 0.75rem; margin-left: 6px; }
-  .rename-input {
-    background: #0d1117; border: 1px solid var(--accent); border-radius: 4px;
-    color: var(--text); font-size: inherit; font-family: inherit;
-    padding: 2px 6px; width: auto; min-width: 100px;
-  }
-  .layout-bar {
-    display: flex; justify-content: flex-end; align-items: center; gap: 8px;
-    padding: 8px 0; font-size: 0.8rem; color: var(--text-dim);
-  }
-  .layout-bar button {
-    background: var(--surface); color: var(--text); border: 1px solid var(--border);
-    padding: 4px 12px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
-  }
-  .layout-bar button:hover { border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -234,15 +199,15 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <!-- SUPERCARD 1: 🧬 Self Model                                   -->
 <!-- Cards: Self-Concept, Self Image, Self Perception, Self-Description -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="supercard" data-supercard-id="self-model">
+<div class="supercard">
   <div class="supercard-header">
-    <h2>🧬 Self Model <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
+    <h2>🧬 Self Model</h2>
     <span class="sc-count">4 cards</span>
   </div>
-  <div class="supercard-grid drop-zone" data-drop-zone="true">
+  <div class="supercard-grid">
     <!-- Self-Concept -->
-    <div class="card" data-card-id="self-concept" draggable="true">
-      <h2>🎯 Self-Concept <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>🎯 Self-Concept</h2>
       <div id="selfConceptContent">
         <div id="scSummary" style="font-size:0.85rem;line-height:1.6;color:var(--text);font-style:italic;margin-bottom:12px">Loading...</div>
         <div>
@@ -252,18 +217,18 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
       </div>
     </div>
     <!-- Self Image -->
-    <div class="card" data-card-id="self-image" draggable="true">
-      <h2>🪞 Self Image <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>🪞 Self Image</h2>
       <div id="selfImageContent" style="font-size:0.85rem">Loading...</div>
     </div>
     <!-- Self Perception -->
-    <div class="card" data-card-id="self-perception" draggable="true">
-      <h2>👁️ Self Perception <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>👁️ Self Perception</h2>
       <div id="selfPerceptionContent" style="font-size:0.85rem">Loading...</div>
     </div>
     <!-- Self-Description -->
-    <div class="card" data-card-id="self-description" draggable="true">
-      <h2>📝 Self-Description <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>📝 Self-Description</h2>
       <div id="descriptionContent" style="font-size:0.85rem;line-height:1.6;color:var(--text)">Loading...</div>
     </div>
   </div>
@@ -273,25 +238,25 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <!-- SUPERCARD 2: 🧠 Personality Profile                           -->
 <!-- Cards: Personality, Characteristics, Identity Traits          -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="supercard" data-supercard-id="personality-profile">
+<div class="supercard">
   <div class="supercard-header">
-    <h2>🧠 Personality Profile <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
+    <h2>🧠 Personality Profile</h2>
     <span class="sc-count">3 cards</span>
   </div>
-  <div class="supercard-grid drop-zone" data-drop-zone="true">
+  <div class="supercard-grid">
     <!-- Personality -->
-    <div class="card" data-card-id="personality" draggable="true">
-      <h2>🧠 Personality <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>🧠 Personality</h2>
       <div id="personalityContent" style="font-size:0.85rem">Loading...</div>
     </div>
     <!-- Characteristics -->
-    <div class="card" data-card-id="characteristics" draggable="true">
-      <h2>🏷️ Characteristics <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>🏷️ Characteristics</h2>
       <div id="characteristicsContent" style="font-size:0.85rem">Loading...</div>
     </div>
     <!-- Identity Traits -->
-    <div class="card" data-card-id="identity-traits" draggable="true">
-      <h2>🧬 Identity Traits <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>🧬 Identity Traits</h2>
       <div id="traits"></div>
     </div>
   </div>
@@ -301,20 +266,20 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <!-- SUPERCARD 3: ⚡ Capabilities                                  -->
 <!-- Cards: Skills, Roles                                          -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="supercard" data-supercard-id="capabilities">
+<div class="supercard">
   <div class="supercard-header">
-    <h2>⚡ Capabilities <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
+    <h2>⚡ Capabilities</h2>
     <span class="sc-count">2 cards</span>
   </div>
-  <div class="supercard-grid drop-zone" data-drop-zone="true">
+  <div class="supercard-grid">
     <!-- Skills -->
-    <div class="card" data-card-id="skills" draggable="true">
-      <h2>⚡ Skills <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>⚡ Skills</h2>
       <div id="skillsContent" style="font-size:0.85rem">Loading...</div>
     </div>
     <!-- Roles -->
-    <div class="card" data-card-id="roles" draggable="true">
-      <h2>🎭 Roles <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>🎭 Roles</h2>
       <div id="rolesContent" style="font-size:0.85rem">Loading...</div>
     </div>
   </div>
@@ -324,28 +289,28 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <!-- SUPERCARD 4: 🧭 Belief System                                 -->
 <!-- Cards: Beliefs, Value Axioms, Identity Coherence              -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="supercard" data-supercard-id="belief-system">
+<div class="supercard">
   <div class="supercard-header">
-    <h2>🧭 Belief System <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
+    <h2>🧭 Belief System</h2>
     <span class="sc-count">3 cards</span>
   </div>
-  <div class="supercard-grid drop-zone" data-drop-zone="true">
+  <div class="supercard-grid">
     <!-- Beliefs -->
-    <div class="card" data-card-id="beliefs" draggable="true">
-      <h2>📜 Beliefs <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>📜 Beliefs</h2>
       <div id="beliefsContent">
         <div style="margin-top:8px"><strong style="font-size:0.85rem">Active Beliefs</strong></div>
         <div id="beliefsList" style="font-size:0.85rem;color:var(--text-dim);margin-top:4px">Loading...</div>
       </div>
     </div>
     <!-- Value Axioms -->
-    <div class="card" data-card-id="value-axioms" draggable="true">
-      <h2>⚖️ Value Axioms <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>⚖️ Value Axioms</h2>
       <div id="axioms"></div>
     </div>
     <!-- Identity Coherence -->
-    <div class="card" data-card-id="identity-coherence" draggable="true">
-      <h2>🔗 Identity Coherence <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>🔗 Identity Coherence</h2>
       <div id="coherenceContent" style="font-size:0.85rem">Loading...</div>
     </div>
   </div>
@@ -355,15 +320,15 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <!-- SUPERCARD 5: 🎯 Direction & Growth                            -->
 <!-- Cards: Purpose, Aspirations                                   -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="supercard" data-supercard-id="direction-growth">
+<div class="supercard">
   <div class="supercard-header">
-    <h2>🎯 Direction & Growth <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
+    <h2>🎯 Direction & Growth</h2>
     <span class="sc-count">2 cards</span>
   </div>
-  <div class="supercard-grid drop-zone" data-drop-zone="true">
+  <div class="supercard-grid">
     <!-- Purpose -->
-    <div class="card" data-card-id="purpose" draggable="true">
-      <h2>💡 Purpose <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>💡 Purpose</h2>
       <div id="purposeContent">
         <div id="purposeStatement" style="font-size:0.85rem;font-style:italic;line-height:1.6;color:var(--text);margin-bottom:12px">Loading...</div>
         <div style="margin-bottom:10px">
@@ -380,8 +345,8 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
       </div>
     </div>
     <!-- Aspirations -->
-    <div class="card" data-card-id="aspirations" draggable="true">
-      <h2>✨ Aspirations <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>✨ Aspirations</h2>
       <div id="aspirationsContent">
         <div id="aspirationsList" style="font-size:0.85rem">Loading...</div>
       </div>
@@ -393,25 +358,25 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <!-- SUPERCARD 6: 📖 Narrative Arc                                 -->
 <!-- Cards: Current Narrative, Self-Narrative, Identity Evolution  -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="supercard" data-supercard-id="narrative-arc">
+<div class="supercard">
   <div class="supercard-header">
-    <h2>📖 Narrative Arc <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
+    <h2>📖 Narrative Arc</h2>
     <span class="sc-count">3 cards</span>
   </div>
-  <div class="supercard-grid drop-zone" data-drop-zone="true">
+  <div class="supercard-grid">
     <!-- Current Narrative -->
-    <div class="card" data-card-id="current-narrative" draggable="true">
-      <h2>📖 Current Narrative <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>📖 Current Narrative</h2>
       <div class="narrative-box" id="narrative">Loading...</div>
     </div>
     <!-- Self-Narrative -->
-    <div class="card" data-card-id="self-narrative" draggable="true">
-      <h2>📖 Self-Narrative <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>📖 Self-Narrative</h2>
       <div id="selfNarrativeContent" style="font-size:0.85rem">Loading...</div>
     </div>
     <!-- Identity Evolution -->
-    <div class="card" data-card-id="identity-evolution" draggable="true">
-      <h2>📈 Identity Evolution <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>📈 Identity Evolution</h2>
       <div id="evolutionContent" style="font-size:0.85rem">Loading...</div>
     </div>
   </div>
@@ -421,20 +386,20 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <!-- SUPERCARD 7: 📊 System Health                                 -->
 <!-- Cards: Vital Signs, Crisis Status, Layer Scores, System Stats -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="supercard" data-supercard-id="system-health">
+<div class="supercard">
   <div class="supercard-header">
-    <h2>📊 System Health <button class="edit-btn" title="Rename supercard" onclick="startRename(this,'supercard')">✎</button></h2>
+    <h2>📊 System Health</h2>
     <span class="sc-count">4 cards</span>
   </div>
-  <div class="supercard-grid drop-zone" data-drop-zone="true">
+  <div class="supercard-grid">
     <!-- Vital Signs -->
-    <div class="card" data-card-id="vital-signs" draggable="true">
-      <h2>🩺 Identity Vital Signs <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>🩺 Identity Vital Signs</h2>
       <div id="vitalSignsContent" style="font-size:0.85rem">Loading...</div>
     </div>
     <!-- Crisis Status -->
-    <div class="card" data-card-id="crisis-status" draggable="true">
-      <h2>🚨 Crisis Status <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>🚨 Crisis Status</h2>
       <div id="crisisContent">
         <div class="stat-grid">
           <div class="stat"><div class="num" id="crisisSeverity">—</div><div class="lbl">Severity</div></div>
@@ -446,13 +411,13 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
       </div>
     </div>
     <!-- Layer Scores -->
-    <div class="card" data-card-id="layer-scores" draggable="true">
-      <h2>📊 Layer Scores <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>📊 Layer Scores</h2>
       <div id="layerScores"></div>
     </div>
     <!-- System Stats -->
-    <div class="card" data-card-id="system-stats" draggable="true">
-      <h2>📈 System Stats <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+    <div class="card">
+      <h2>📈 System Stats</h2>
       <div class="stat-grid">
         <div class="stat"><div class="num" id="statSnapshots">—</div><div class="lbl">Snapshots</div></div>
         <div class="stat"><div class="num" id="statAttempts">—</div><div class="lbl">Attempts</div></div>
@@ -466,8 +431,8 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- TIMELINE (Standalone)                                         -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<div class="card" data-card-id="timeline" draggable="true">
-      <h2>📅 Snapshot Timeline <button class="edit-btn" title="Rename" onclick="startRename(this,'card')">✎</button></h2>
+<div class="card">
+  <h2>📅 Snapshot Timeline</h2>
   <div id="timelineContent"></div>
 </div>
 
@@ -1118,259 +1083,7 @@ document.getElementById('autoRefresh').addEventListener('change', setupAutoRefre
 // Initial load
 loadAll();
 setupAutoRefresh();
-
-// ── Drag-and-Drop ──
-let draggedCardId = null;
-let dragSourceZone = null;
-
-document.addEventListener('dragstart', function(e) {
-  var card = e.target.closest('.card[draggable]');
-  if (!card) return;
-  draggedCardId = card.dataset.cardId;
-  dragSourceZone = card.closest('.drop-zone');
-  card.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', draggedCardId);
-});
-
-document.addEventListener('dragend', function(e) {
-  var card = e.target.closest('.card');
-  if (card) card.classList.remove('dragging');
-  document.querySelectorAll('.drag-over-zone').forEach(function(z) { z.classList.remove('drag-over-zone'); });
-  document.querySelectorAll('.drag-over').forEach(function(c) { c.classList.remove('drag-over'); });
-});
-
-document.addEventListener('dragover', function(e) {
-  var zone = e.target.closest('[data-drop-zone="true"]');
-  if (zone) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; zone.classList.add('drag-over-zone'); }
-  var card = e.target.closest('.card[draggable]');
-  if (card && card.dataset.cardId !== draggedCardId) { e.preventDefault(); card.classList.add('drag-over'); }
-});
-
-document.addEventListener('dragleave', function(e) {
-  var zone = e.target.closest('[data-drop-zone="true"]');
-  if (zone) zone.classList.remove('drag-over-zone');
-  var card = e.target.closest('.card');
-  if (card) card.classList.remove('drag-over');
-});
-
-document.addEventListener('drop', function(e) {
-  e.preventDefault();
-  document.querySelectorAll('.drag-over-zone').forEach(function(z) { z.classList.remove('drag-over-zone'); });
-  document.querySelectorAll('.drag-over').forEach(function(c) { c.classList.remove('drag-over'); });
-  if (!draggedCardId) return;
-  var targetZone = e.target.closest('[data-drop-zone="true"]');
-  if (!targetZone) return;
-  var draggedCard = document.querySelector('.card[data-card-id="' + draggedCardId + '"]');
-  if (!draggedCard) return;
-  if (targetZone === dragSourceZone) return;
-  var insertBefore = e.target.closest('.card[draggable]');
-  if (insertBefore && insertBefore.dataset.cardId !== draggedCardId && targetZone.contains(insertBefore)) {
-    targetZone.insertBefore(draggedCard, insertBefore);
-  } else {
-    targetZone.appendChild(draggedCard);
-  }
-  saveLayout();
-  updateLayoutStatus('saved');
-});
-
-// ── Rename ──
-function startRename(btn, type) {
-  var container = type === 'supercard' ? btn.closest('.supercard-header') : btn.closest('.card');
-  var h2 = container.querySelector('h2');
-  // Get text content excluding the edit button
-  var fullText = '';
-  for (var i = 0; i < h2.childNodes.length; i++) {
-    var n = h2.childNodes[i];
-    if (n.nodeType === 3 && n.textContent.trim()) fullText += n.textContent.trim();
-  }
-  var icon = fullText.match(/^[\u{1F000}-\u{1FFFF}]|^[\u2600-\u27BF}]|^[^\s]/u);
-  var iconChar = icon ? icon[0] : '';
-  var nameOnly = iconChar ? fullText.slice(iconChar.length).trim() : fullText;
-  btn.style.display = 'none';
-  var input = document.createElement('input');
-  input.type = 'text';
-  input.className = 'rename-input';
-  input.value = nameOnly;
-  input.dataset.icon = iconChar;
-  input.dataset.type = type;
-  h2.insertBefore(input, btn);
-  input.focus();
-  input.select();
-  input.addEventListener('blur', function() { finishRename(input, h2, btn); });
-  input.addEventListener('keydown', function(ev) {
-    if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
-    if (ev.key === 'Escape') { ev.preventDefault(); input.value = nameOnly; input.blur(); }
-  });
-}
-
-function finishRename(input, h2, btn) {
-  var icon = input.dataset.icon || '';
-  var type = input.dataset.type || 'card';
-  var newName = input.value.trim();
-  if (!newName) { input.remove(); btn.style.display = ''; return; }
-  var fullText = icon ? icon + ' ' + newName : newName;
-  // Remove all children except the edit button
-  while (h2.firstChild && h2.firstChild !== btn) { h2.removeChild(h2.firstChild); }
-  var textNode = document.createTextNode(fullText + ' ');
-  h2.insertBefore(textNode, btn);
-  input.remove();
-  btn.style.display = '';
-  // Save
-  var layout = getLayout();
-  if (type === 'card') {
-    var card = btn.closest('.card');
-    if (card && card.dataset.cardId) {
-      if (!layout.cardNames) layout.cardNames = {};
-      layout.cardNames[card.dataset.cardId] = fullText;
-      saveLayoutObj(layout);
-      updateLayoutStatus('renamed');
-    }
-  } else {
-    var sc = btn.closest('.supercard');
-    if (sc && sc.dataset.supercardId) {
-      if (!layout.supercardNames) layout.supercardNames = {};
-      layout.supercardNames[sc.dataset.supercardId] = fullText;
-      saveLayoutObj(layout);
-      updateLayoutStatus('renamed');
-    }
-  }
-}
-
-// ── Layout Persistence ──
-function getDefaultLayout() {
-  var layout = { supercards: [], cardNames: {}, supercardNames: {} };
-  document.querySelectorAll('.supercard').forEach(function(sc) {
-    var sid = sc.dataset.supercardId;
-    if (!sid) return;
-    var h2 = sc.querySelector('.supercard-header h2');
-    var name = '';
-    if (h2) { for (var i = 0; i < h2.childNodes.length; i++) { var n = h2.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) name += n.textContent.trim(); } }
-    layout.supercardNames[sid] = name || sid;
-    var cards = [];
-    sc.querySelectorAll('.card[data-card-id]').forEach(function(c) {
-      var cid = c.dataset.cardId;
-      var ch2 = c.querySelector('h2');
-      var cname = '';
-      if (ch2) { for (var i = 0; i < ch2.childNodes.length; i++) { var n = ch2.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) cname += n.textContent.trim(); } }
-      layout.cardNames[cid] = cname || cid;
-      cards.push(cid);
-    });
-    layout.supercards.push({ id: sid, cards: cards });
-  });
-  return layout;
-}
-
-function getLayout() {
-  try { var saved = localStorage.getItem('identity_dashboard_layout'); return saved ? JSON.parse(saved) : null; } catch(e) { return null; }
-}
-
-function saveLayoutObj(layout) {
-  try { localStorage.setItem('identity_dashboard_layout', JSON.stringify(layout)); } catch(e) {}
-}
-
-function saveLayout() {
-  var layout = { supercards: [], cardNames: {}, supercardNames: {} };
-  document.querySelectorAll('.supercard').forEach(function(sc) {
-    var sid = sc.dataset.supercardId;
-    if (!sid) return;
-    var h2 = sc.querySelector('.supercard-header h2');
-    var name = '';
-    if (h2) { for (var i = 0; i < h2.childNodes.length; i++) { var n = h2.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) name += n.textContent.trim(); } }
-    layout.supercardNames[sid] = name || sid;
-    var cards = [];
-    sc.querySelectorAll('.card[data-card-id]').forEach(function(c) { cards.push(c.dataset.cardId); });
-    layout.supercards.push({ id: sid, cards: cards });
-  });
-  saveLayoutObj(layout);
-}
-
-function applyLayout(layout) {
-  if (!layout || !layout.supercards) return;
-  layout.supercards.forEach(function(sc) {
-    var zone = document.querySelector('.supercard[data-supercard-id="' + sc.id + '"] .drop-zone');
-    if (!zone) return;
-    sc.cards.forEach(function(cid) {
-      var card = document.querySelector('.card[data-card-id="' + cid + '"]');
-      if (card && !zone.contains(card)) { zone.appendChild(card); }
-    });
-    sc.cards.forEach(function(cid, idx) {
-      var card = document.querySelector('.card[data-card-id="' + cid + '"]');
-      if (card && zone.contains(card)) {
-        var ref = zone.children[idx];
-        if (ref && ref !== card) zone.insertBefore(card, ref);
-        else if (!ref) zone.appendChild(card);
-      }
-    });
-  });
-  // Apply custom names
-  if (layout.supercardNames) {
-    Object.keys(layout.supercardNames).forEach(function(sid) {
-      var sc = document.querySelector('.supercard[data-supercard-id="' + sid + '"]');
-      if (!sc) return;
-      var h2 = sc.querySelector('.supercard-header h2');
-      if (!h2) return;
-      var btn = h2.querySelector('.edit-btn');
-      while (h2.firstChild && h2.firstChild !== btn) { h2.removeChild(h2.firstChild); }
-      var txt = document.createTextNode(layout.supercardNames[sid] + ' ');
-      h2.insertBefore(txt, btn);
-    });
-  }
-  if (layout.cardNames) {
-    Object.keys(layout.cardNames).forEach(function(cid) {
-      var card = document.querySelector('.card[data-card-id="' + cid + '"]');
-      if (!card) return;
-      var h2 = card.querySelector('h2');
-      if (!h2) return;
-      var btn = h2.querySelector('.edit-btn');
-      while (h2.firstChild && h2.firstChild !== btn) { h2.removeChild(h2.firstChild); }
-      var txt = document.createTextNode(layout.cardNames[cid] + ' ');
-      h2.insertBefore(txt, btn);
-    });
-  }
-}
-
-function resetLayout() {
-  localStorage.removeItem('identity_dashboard_layout');
-  location.reload();
-}
-
-function saveLayoutSnapshot() {
-  var layout = getDefaultLayout();
-  layout._snapshot = true;
-  layout._timestamp = new Date().toISOString();
-  saveLayoutObj(layout);
-  updateLayoutStatus('default-saved');
-}
-
-function updateLayoutStatus(msg) {
-  var el = document.getElementById('layoutStatus');
-  if (!el) return;
-  var msgs = { saved: '\ud83d\udcbe Layout saved', renamed: '\u270f\ufe0f Name saved', default: '\ud83d\udcd0 Drag cards to reorder \u2022 Click \u270e to rename', 'default-saved': '\u2705 Saved as default layout' };
-  el.textContent = msgs[msg] || msg;
-  setTimeout(function() { el.textContent = msgs['default']; }, 3000);
-}
-
-// ── Init on load ──
-(function() {
-  var origLoadAll = window.loadAll;
-  window.loadAll = async function() {
-    if (origLoadAll) await origLoadAll();
-    var layout = getLayout();
-    if (layout && layout.supercards) applyLayout(layout);
-    if (!getLayout()) { var def = getDefaultLayout(); def._default = true; saveLayoutObj(def); }
-  };
-  window._dashboardLoaded = true;
-})();
 </script>
-
-
-<!-- Layout Controls -->
-<div class="layout-bar">
-  <span id="layoutStatus">📐 Drag cards to reorder • Click ✎ to rename</span>
-  <button onclick="resetLayout()" title="Restore default card arrangement">↺ Reset Layout</button>
-  <button onclick="saveLayoutSnapshot()" title="Save current layout as default">💾 Save as Default</button>
-</div>
 
 <!-- Modal overlay for clickable tooltips -->
 <div id="detailModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(4px)" onclick="closeModal(event)">
